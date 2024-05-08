@@ -1,0 +1,1 @@
+Aplikasi RAINITAS ({version}) ini dibuat oleh **{author}** menggunakan Streamlit. 
