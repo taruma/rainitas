@@ -1,2 +1,2 @@
 # rainitas
- Pengolah Data Hujan with AI
+ Pengolah Data Hujan dengan AI
