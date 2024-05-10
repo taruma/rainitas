@@ -1,0 +1,1 @@
+Berdasarkan koordinat yang Anda masukkan, telah ditemukan sebanyak **{total_nearest_stations} stasiun hujan terdekat** dalam radius {radius_km} kilometer dari titik **{coordinate_name}** _({latitude}, {longitude})_. Peta dan tabel di bawah ini menunjukkan lokasi dan informasi detail dari stasiun-stasiun tersebut.

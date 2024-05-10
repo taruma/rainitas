@@ -36,18 +36,18 @@ st.title(":round_pushpin: Eksplorasi Data Hujan :round_pushpin:")
 
 ## Introduction
 
-with st.expander("Pendahuluan"):
-    md_introduction = mainfunc.load_markdown("docs/stations/01_intro.md")
-    st.markdown(md_introduction, unsafe_allow_html=True)
+# with st.expander("Pendahuluan"):
+md_introduction = mainfunc.load_markdown("docs/stations/01_intro.md")
+st.markdown(md_introduction, unsafe_allow_html=True)
 
 ## Map of Stations
 
 st.markdown("## 🗺️ Peta Stasiun Pengamatan Hujan")
 md_intro_maps = mainfunc.load_markdown("docs/stations/02a_intro_maps.md")
 data_intro_maps = {
-    'dataset_name': 'Kaggle - greegtitan/indonesia-climate',
-    'dataset_link': 'https://www.kaggle.com/datasets/greegtitan/indonesia-climate',
-    'total_stations': len(combined_metadata_rr),
+    "dataset_name": "Kaggle - greegtitan/indonesia-climate",
+    "dataset_link": "https://www.kaggle.com/datasets/greegtitan/indonesia-climate",
+    "total_stations": len(combined_metadata_rr),
 }
 st.markdown(md_intro_maps.format(**data_intro_maps))
 
@@ -70,50 +70,52 @@ with tab3:
 ## Input Coordinate
 
 st.markdown("#### 📌 Titik Koordinat Tinjauan")
+md_my_coordinate = mainfunc.load_markdown("docs/stations/03_my_coordinate.md")
+st.markdown(md_my_coordinate, unsafe_allow_html=True)
 
-tab1, tab2, tab3 = st.columns(3)
+col1, col2, col3 = st.columns(3)
 
-with tab1:
+with col1:
     coordinate_name = st.text_input(
         "Coordinate Name / Nama Koordinat", "Koordinat Saya", key="coordinate_name"
     )
-    is_name_valid = (coordinate_name is not None) and (coordinate_name != "")
+    IS_NAME_VALID = (coordinate_name is not None) and (coordinate_name != "")
 
-with tab2:
-    latitude = st.text_input(
-        "Latitude / Lintang Derajat", "-6.2631", key="latitude"
-    )
-    longitude = st.text_input(
-        "Longitude / Bujur Derajat", "106.8095", key="longitude"
-    )
+with col2:
+    latitude = st.text_input("Latitude / Lintang Derajat", "-6.2631", key="latitude")
+    longitude = st.text_input("Longitude / Bujur Derajat", "106.8095", key="longitude")
 
     IS_LAT_VALID = pyfunc.validate_single_coordinate(latitude, "lat")
     IS_LON_VALID = pyfunc.validate_single_coordinate(longitude, "lon")
 
-with tab3:
+with col3:
     radius_km = st.number_input("Radius (km)", 1, step=1, value=25, key="radius_km")
-    n_nearest = st.number_input(
-        "Total Stations", 1, step=1, value=10, key="n_nearest"
-    )
+    n_nearest = st.number_input("Total Stations", 1, step=1, value=10, key="n_nearest")
     btn_coordinate = st.button(
         ":round_pushpin: Find Nearest Stations",
         use_container_width=True,
     )
 
+placeholder_info_coordinate = st.empty()
+
 ### Validate Input
 
-is_all_valid = IS_LAT_VALID and IS_LON_VALID and is_name_valid
+is_all_valid = IS_LAT_VALID and IS_LON_VALID and IS_NAME_VALID
 if not is_all_valid:
     EMOJI_CHECK = [":x:", ":heavy_check_mark:"]
     st.error(
         f"""
         Please input the coordinate information correctly.\n
-        - Coordinate Name: {EMOJI_CHECK[is_name_valid]} \n
+        - Coordinate Name: {EMOJI_CHECK[IS_NAME_VALID]} \n
         - Latitude: {EMOJI_CHECK[IS_LAT_VALID]} \n
         - Longitude: {EMOJI_CHECK[IS_LON_VALID]} \n
         """
     )
+    st.session_state.table_nearest_stations = None
     st.session_state.fig_nearest_stations = None
+
+
+### Find Nearest Stations (table and map)
 
 if btn_coordinate and is_all_valid:
 
@@ -124,12 +126,12 @@ if btn_coordinate and is_all_valid:
     )
 
     @st.cache_data
-    def find_nearest_stations(data, radius, n_stations):
+    def find_nearest_stations(data, radius, n_stations, round_decimal=3):
         """Find nearest stations based on distance and radius."""
 
         df_nearest_stations = (
             data.sort_values("distance")
-            .round(3)
+            .round(round_decimal)
             .loc[data.distance < radius]
             .iloc[:n_stations]
         )
@@ -149,37 +151,39 @@ if btn_coordinate and is_all_valid:
     st.session_state.prev_coordinate_name = coordinate_name
     st.session_state.prev_latitude = latitude
     st.session_state.prev_longitude = longitude
-
-else:
-    if not is_all_valid:
-        st.info("Click the button to find/update nearest stations.")
-
-
+    st.session_state.prev_radius_km = radius_km
+    st.session_state.prev_n_nearest = n_nearest
 
 placeholder = st.empty()
+placeholder.info("Click 'Find Nearest Stations' to see the result.")
 
 if st.session_state.get("fig_nearest_stations") is not None and is_all_valid:
     with placeholder.container():
-        st.divider()
         st.markdown("#### 🔍 Peta Stasiun Terdekat")
-        st.markdown(
-            # "<div align='center' markdown=1>"
-            f"***{st.session_state.prev_coordinate_name} "
-            f"({st.session_state.prev_latitude}, {st.session_state.prev_longitude})***"
-            # "</div>",
-            ,unsafe_allow_html=True,
-        )
+
+        DF_TABLE = st.session_state.table_nearest_stations
+
+        dict_intro = {
+            "coordinate_name": st.session_state.prev_coordinate_name,
+            "latitude": st.session_state.prev_latitude,
+            "longitude": st.session_state.prev_longitude,
+            "radius_km": st.session_state.prev_radius_km,
+            "n_nearest": st.session_state.prev_n_nearest,
+            "total_nearest_stations": len(DF_TABLE),
+        }
+
+        md_intro_nearest = mainfunc.load_markdown("docs/stations/04_intro_nearest.md")
+        st.markdown(md_intro_nearest.format(**dict_intro))
+
         st.plotly_chart(st.session_state.fig_nearest_stations, use_container_width=True)
         COLS_TABLE = "title distance station_name".split()
         COLS_NAME = "ID,DATASET,DISTANCE,STATION NAME".split(",")
         with st.expander("Table Nearest Stations"):
             st.dataframe(
-                st.session_state.table_nearest_stations[COLS_TABLE]
+                DF_TABLE[COLS_TABLE]  # pylint: disable=unsubscriptable-object
                 .rename_axis("ID")
                 .rename(columns=dict(zip(COLS_TABLE, COLS_NAME[1:])))
             )
-        st.divider()
-
 
 
 st.button("Refresh", key="sta_refresh")
