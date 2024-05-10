@@ -43,6 +43,13 @@ with st.expander("Pendahuluan"):
 ## Map of Stations
 
 st.markdown("## 🗺️ Peta Stasiun Pengamatan Hujan")
+md_intro_maps = mainfunc.load_markdown("docs/stations/02a_intro_maps.md")
+data_intro_maps = {
+    'dataset_name': 'Kaggle - greegtitan/indonesia-climate',
+    'dataset_link': 'https://www.kaggle.com/datasets/greegtitan/indonesia-climate',
+    'total_stations': len(combined_metadata_rr),
+}
+st.markdown(md_intro_maps.format(**data_intro_maps))
 
 fig_map = pyfigure.generate_station_map_figure(combined_metadata_rr)
 
@@ -55,7 +62,7 @@ with tab2:
     st.dataframe(combined_metadata_rr)
 
 with tab3:
-    md_metadata_info = mainfunc.load_markdown("docs/stations/02_metadata_info.md")
+    md_metadata_info = mainfunc.load_markdown("docs/stations/02b_metadata_info.md")
     with st.container(border=True):
         st.markdown(md_metadata_info, unsafe_allow_html=True)
 

@@ -6,3 +6,7 @@
 .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {
     text-align: center;
 }
+
+.stMarkdown p {
+    text-align: justify;
+}
