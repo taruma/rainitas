@@ -48,9 +48,3 @@ st.markdown(data_md)
 st.divider()
 
 # ----------- SETUP PAGE
-
-if "OPENAI_API_KEY" not in st.session_state:
-    st.session_state.OPENAI_API_KEY = None
-
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-st.session_state["OPENAI_API_KEY"] = OPENAI_API_KEY
