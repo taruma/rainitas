@@ -1,18 +1,10 @@
 """Streamlit app"""
 
-import os
-
 import streamlit as st
-from dotenv import load_dotenv
-from st_pages import Page, show_pages
-
 from src import mainfunc
 
-# Load environment variables
-load_dotenv()
 
-# --- SETUP PAGE
-
+# SETUP PAGE CONFIG
 st.set_page_config(
     page_title="Rainitas by Taruma",
     page_icon=":material/rainy:",
@@ -24,19 +16,9 @@ st.set_page_config(
     },
 )
 
-show_pages(
-    [
-        Page("app.py", "Rainitas", "🌧️"),
-        Page("pages/stations.py", "Stations", "📍"),
-        Page("pages/rainfall.py", "Rainfall", "📈"),
-        Page("pages/anfrek.py", "Analysis", "🔮"),
-        Page("pages/summary.py", "Summary", "📊"),
-    ]
-)
-
+# SETUP PAGES
 mainfunc.load_css("assets/mainstyles.css")
-
-# SIDEBAR
+mainfunc.main_sidebar()
 
 # LOADING MARKDOWN FILES
 data_md = mainfunc.load_markdown("docs/rainitas.md")

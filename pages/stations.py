@@ -18,11 +18,12 @@ st.set_page_config(
     initial_sidebar_state="auto",
     menu_items={
         "Report a bug": "https://github.com/taruma/rainitas/issues/new",
-        "About": "Simple app to process rainfall data with AI.",
+        "About": "Simple app to process rainfall data",
     },
 )
 
 mainfunc.load_css("assets/stations.css")
+mainfunc.main_sidebar()
 
 # INITIALIZE
 
@@ -33,16 +34,19 @@ combined_metadata_comp = pyfunc.read_metadata_csv("data/completeness")
 
 st.title(":round_pushpin: Eksplorasi Data Hujan :round_pushpin:")
 
+## Introduction
+
 with st.expander("Pendahuluan"):
     md_introduction = mainfunc.load_markdown("docs/stations/01_intro.md")
     st.markdown(md_introduction, unsafe_allow_html=True)
+
+## Map of Stations
 
 st.markdown("## 🗺️ Peta Stasiun Pengamatan Hujan")
 
 fig_map = pyfigure.generate_station_map_figure(combined_metadata_rr)
 
 tab1, tab2, tab3 = st.tabs(["Peta Stasiun", "Metadata", "Informasi Metadata"])
-
 
 with tab1:
     st.plotly_chart(fig_map, use_container_width=True)
@@ -56,38 +60,40 @@ with tab3:
         st.markdown(md_metadata_info, unsafe_allow_html=True)
 
 
+## Input Coordinate
+
 st.markdown("#### 📌 Titik Koordinat Tinjauan")
 
-tab1, tab2, col3 = st.columns(3)
+tab1, tab2, tab3 = st.columns(3)
 
 with tab1:
     coordinate_name = st.text_input(
-        "Coordinate Name / Nama Koordinat", "Koordinat Saya", key="sta_coordinate_name"
+        "Coordinate Name / Nama Koordinat", "Koordinat Saya", key="coordinate_name"
     )
     is_name_valid = (coordinate_name is not None) and (coordinate_name != "")
 
 with tab2:
     latitude = st.text_input(
-        "Latitude / Lintang Derajat", "-6.2631", key="sta_latitude"
+        "Latitude / Lintang Derajat", "-6.2631", key="latitude"
     )
     longitude = st.text_input(
-        "Longitude / Bujur Derajat", "106.8095", key="sta_longitude"
+        "Longitude / Bujur Derajat", "106.8095", key="longitude"
     )
 
     IS_LAT_VALID = pyfunc.validate_single_coordinate(latitude, "lat")
-    # st.checkbox("Latitude / Lintang Derajat", value=IS_LAT_VALID, disabled=True)
     IS_LON_VALID = pyfunc.validate_single_coordinate(longitude, "lon")
-    # st.checkbox("Bujur", value=IS_LON_VALID, disabled=True)
 
-with col3:
-    radius_km = st.number_input("Radius (km)", 1, step=1, value=25, key="sta_radius_km")
+with tab3:
+    radius_km = st.number_input("Radius (km)", 1, step=1, value=25, key="radius_km")
     n_nearest = st.number_input(
-        "Total Stations", 1, step=1, value=10, key="sta_n_nearest"
+        "Total Stations", 1, step=1, value=10, key="n_nearest"
     )
     btn_coordinate = st.button(
         ":round_pushpin: Find Nearest Stations",
         use_container_width=True,
     )
+
+### Validate Input
 
 is_all_valid = IS_LAT_VALID and IS_LON_VALID and is_name_valid
 if not is_all_valid:
@@ -100,6 +106,7 @@ if not is_all_valid:
         - Longitude: {EMOJI_CHECK[IS_LON_VALID]} \n
         """
     )
+    st.session_state.fig_nearest_stations = None
 
 if btn_coordinate and is_all_valid:
 
@@ -137,7 +144,8 @@ if btn_coordinate and is_all_valid:
     st.session_state.prev_longitude = longitude
 
 else:
-    st.info("Click the button to find/update nearest stations.")
+    if not is_all_valid:
+        st.info("Click the button to find/update nearest stations.")
 
 
 
@@ -148,7 +156,11 @@ if st.session_state.get("fig_nearest_stations") is not None and is_all_valid:
         st.divider()
         st.markdown("#### 🔍 Peta Stasiun Terdekat")
         st.markdown(
-            f"###### {st.session_state.prev_coordinate_name} ({st.session_state.prev_latitude}, {st.session_state.prev_longitude})"
+            # "<div align='center' markdown=1>"
+            f"***{st.session_state.prev_coordinate_name} "
+            f"({st.session_state.prev_latitude}, {st.session_state.prev_longitude})***"
+            # "</div>",
+            ,unsafe_allow_html=True,
         )
         st.plotly_chart(st.session_state.fig_nearest_stations, use_container_width=True)
         COLS_TABLE = "title distance station_name".split()
