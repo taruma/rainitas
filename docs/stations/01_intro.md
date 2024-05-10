@@ -1,5 +1,3 @@
-<div style="text-align: justify;">
-
 ***Mengakses dan Akuisisi Data Hujan dengan Efisien***
 
 Dalam dunia analisis hidrologi, data hujan merupakan elemen krusial. Namun, memperoleh informasi spesifik dari database yang luas seringkali membutuhkan waktu dan usaha yang signifikan. Pada halaman ini, Anda dapat mengeksplorasi data hujan yang tersedia di berbagai stasiun hujan di Indonesia. Halaman ini dirancang untuk mempermudah dan mempercepat proses eksplorasi, visualisasi, dan akuisisi data hujan, sehingga Anda dapat fokus pada analisis dan pengambilan keputusan.
@@ -16,5 +14,3 @@ Pada halaman ini Anda dapat:
 *   **Memilih Stasiun dan Periode:** Tentukan stasiun dan periode waktu tertentu untuk analisis data yang lebih terfokus. 
 *   **Memvisualisasikan Data Hujan:** Lihat pola dan tren curah hujan melalui grafik yang informatif.
 *   **Mengunduh Data:** Dapatkan data hujan harian dalam format CSV untuk analisis lebih lanjut menggunakan aplikasi lain. 
-
-<div>
