@@ -1,0 +1,8 @@
+.fullScreenFrame > div {
+    display: flex;
+    justify-content: center;
+}
+
+.stMarkdown h1 {
+    text-align: center;
+}
