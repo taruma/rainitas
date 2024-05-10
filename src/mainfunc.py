@@ -1,7 +1,6 @@
 """Collection of functions for doing my project."""
 
 import streamlit as st
-from st_pages import Page, show_pages, Section
 
 @st.cache_data
 def load_markdown(filename: str) -> str:
