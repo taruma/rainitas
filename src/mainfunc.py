@@ -16,7 +16,6 @@ def load_css(filename: str) -> None:
         st.html(f"<style>{f.read()}</style>")
 
 def main_sidebar():
-    
     with st.sidebar:
         st.page_link("app.py", label="Rainitas", icon="🌧️")
         st.write("**Aplikasi**")
