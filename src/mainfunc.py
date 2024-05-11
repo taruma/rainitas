@@ -15,11 +15,12 @@ def load_css(filename: str) -> None:
         st.html(f"<style>{f.read()}</style>")
 
 def main_sidebar():
+    """Create the main sidebar for the app."""
     with st.sidebar:
         st.page_link("app.py", label="Rainitas", icon="🌧️")
         st.write("**Aplikasi**")
         st.page_link("pages/stations.py", label="Stations", icon="📍")
-        st.page_link("pages/rainfall.py", label="Rainfall", icon="📈")
-        st.page_link("pages/anfrek.py", label="Analysis", icon="🔮")
-        st.write("_Generated_")
-        st.page_link("pages/summary.py", label="Summary", icon="📊")
+        # st.page_link("pages/rainfall.py", label="Rainfall", icon="📈")
+        # st.page_link("pages/anfrek.py", label="Analysis", icon="🔮")
+        # st.write("_Generated_")
+        # st.page_link("pages/summary.py", label="Summary", icon="📊")
