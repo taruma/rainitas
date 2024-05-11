@@ -202,10 +202,17 @@ if st.session_state.get("fig_nearest_stations") is not None and is_all_valid:
         st.markdown(md_intro_nearest.format(**dict_nearest))
 
         # Map Nearest Stations
-        st.plotly_chart(st.session_state.fig_nearest_stations, use_container_width=True)
 
-        # Table Nearest Stations
-        with st.expander("Table Nearest Stations"):
+        tab1, tab2 = st.tabs(["Peta Stasiun Terdekat", "Tabel Stasiun Terdekat"])
+
+        with tab1:
+            st.plotly_chart(
+                st.session_state.fig_nearest_stations, use_container_width=True
+            )
+
+        with tab2:
+            # Table Nearest Stations
+            # with st.expander("Table Nearest Stations"):
             st.dataframe(table_nearest_updated)
 
         # Summary Nearest Stataions
@@ -223,6 +230,77 @@ placeholder_completeness = st.empty()
 placeholder_completeness.info("Complete Nearest Stations to continue.")
 
 if IS_SECTION_NEAREST_DONE:
-    placeholder_completeness.write("HEHUEHUEHEUHEU")
+
+    # LOAD DATA
+    md_intro_complete = mainfunc.load_markdown("docs/stations/06_intro_complete.md")
+    md_intro_heatmap = mainfunc.load_markdown("docs/stations/07_intro_heatmap.md")
+    md_sum_heatmap = mainfunc.load_markdown("docs/stations/08_sum_heatmap.md")
+    nearest_stations_list = table_nearest_updated.index.tolist()
+
+    dataframe_comp = pyfunc.get_dataframe_from_folder(
+        nearest_stations_list, combined_metadata_comp, "data/completeness"
+    )
+
+    fig_completeness = pyfigure.generate_completeness_heatmap(
+        dataframe_comp, combined_metadata_comp
+    )
+
+    graph_bars = []
+    bar_names = []
+
+    for stat_id in nearest_stations_list:
+        _series = dataframe_comp[stat_id].dropna()
+        _bar = pyfigure.generate_completeness_bar(_series, combined_metadata_comp)
+        _name = combined_metadata_comp.loc[stat_id, "station_name"]
+        graph_bars.append(_bar)
+        bar_names.append(_name)
+
+    # DISPLAY
+    with placeholder_completeness.container():
+
+        # Intro Completeness
+        st.markdown(md_intro_complete)
+
+        # Completeness Heatmap
+        st.markdown("###### 🎲 Heatmap Kelengkapan Data")
+        st.markdown(md_intro_heatmap.format(**dict_nearest))
+
+        tab1, tab2, tab3 = st.tabs(
+            [
+                "Heatmap Kelengkapan",
+                "Tabel Kelengkapan Data",
+                "Grafik Bar Kelengkapan Data",
+            ]
+        )
+
+        with tab1:
+            st.plotly_chart(
+                fig_completeness,
+                use_container_width=True,
+                config={"displayModeBar": False},
+            )
+        with tab2:
+            st.dataframe(dataframe_comp)
+        with tab3:
+            for i, tab in enumerate(bar_names):
+                st.markdown(f"###### 🌧️ {tab}")
+                st.plotly_chart(
+                    graph_bars[i],
+                    use_container_width=True,
+                    config={"displayModeBar": False},
+                )
+
+        # st.markdown(md_sum_heatmap)
+        with st.expander("Analisis Data Kelengkapan"):
+            text_analysis_complete = st.text_area(
+                "Masukan analisis kamu",
+                value=md_sum_heatmap,
+                height=200,
+                key="text_analysis_complete",
+            )
+
+        if st.session_state.text_analysis_complete:
+            st.markdown(st.session_state.text_analysis_complete)
+
 
 st.button("Refresh", key="sta_refresh")
