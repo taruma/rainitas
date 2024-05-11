@@ -29,10 +29,12 @@ mainfunc.main_sidebar()
 
 combined_metadata_rr = pyfunc.read_metadata_csv("data/rainfall")
 combined_metadata_comp = pyfunc.read_metadata_csv("data/completeness")
+IS_SECTION_NEAREST_DONE = False
 
 # ----------- START OF PAGE
 
 st.title(":round_pushpin: Eksplorasi Data Hujan :round_pushpin:")
+st.subheader("Mengakses dan Mengakuisisi Data Hujan")
 
 ## Introduction
 
@@ -77,7 +79,7 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     coordinate_name = st.text_input(
-        "Coordinate Name / Nama Koordinat", "Koordinat Saya", key="coordinate_name"
+        "Coordinate Name / Nama Koordinat", "TinjauanKu", key="coordinate_name"
     )
     IS_NAME_VALID = (coordinate_name is not None) and (coordinate_name != "")
 
@@ -96,8 +98,6 @@ with col3:
         use_container_width=True,
     )
 
-placeholder_info_coordinate = st.empty()
-
 ### Validate Input
 
 is_all_valid = IS_LAT_VALID and IS_LON_VALID and IS_NAME_VALID
@@ -113,7 +113,7 @@ if not is_all_valid:
     )
     st.session_state.table_nearest_stations = None
     st.session_state.fig_nearest_stations = None
-
+    IS_SECTION_NEAREST_DONE = False
 
 ### Find Nearest Stations (table and map)
 
@@ -154,36 +154,75 @@ if btn_coordinate and is_all_valid:
     st.session_state.prev_radius_km = radius_km
     st.session_state.prev_n_nearest = n_nearest
 
-placeholder = st.empty()
-placeholder.info("Click 'Find Nearest Stations' to see the result.")
+### Display Nearest Stations
+
+ph_nearest_stations = st.empty()
+ph_nearest_stations.info("Click 'Find Nearest Stations' to see the result.")
 
 if st.session_state.get("fig_nearest_stations") is not None and is_all_valid:
-    with placeholder.container():
-        st.markdown("#### 🔍 Peta Stasiun Terdekat")
+    with ph_nearest_stations.container():
 
-        DF_TABLE = st.session_state.table_nearest_stations
+        # Load Data
+        @st.cache_data
+        def table_nearest_rename_columns(df_nearest):
+            """Rename columns of nearest stations table."""
+            selected_columns = "title distance station_name".split()
+            new_columns_name = "ID,DATASET,DISTANCE,STATION NAME".split(",")
 
-        dict_intro = {
+            df_updated = (
+                df_nearest[selected_columns]
+                .rename_axis("ID")
+                .rename(columns=dict(zip(selected_columns, new_columns_name[1:])))
+            )
+            return df_updated
+
+        table_nearest_updated = table_nearest_rename_columns(
+            st.session_state.table_nearest_stations
+        )
+
+        dict_nearest = {
             "coordinate_name": st.session_state.prev_coordinate_name,
             "latitude": st.session_state.prev_latitude,
             "longitude": st.session_state.prev_longitude,
             "radius_km": st.session_state.prev_radius_km,
             "n_nearest": st.session_state.prev_n_nearest,
-            "total_nearest_stations": len(DF_TABLE),
+            "total_nearest_stations": len(table_nearest_updated),
+            "nearest_stations_name": ", ".join(
+                table_nearest_updated["STATION NAME"].tolist()
+            ),
+            "closest_station_name": table_nearest_updated.iloc[0]["STATION NAME"],
+            "closest_station_distance": table_nearest_updated.iloc[0]["DISTANCE"],
+            "farthest_station_name": table_nearest_updated.iloc[-1]["STATION NAME"],
+            "farthest_station_distance": table_nearest_updated.iloc[-1]["DISTANCE"],
         }
 
+        # Intro Nearest Stations
+        st.markdown("#### 🔍 Peta Stasiun Terdekat")
         md_intro_nearest = mainfunc.load_markdown("docs/stations/04_intro_nearest.md")
-        st.markdown(md_intro_nearest.format(**dict_intro))
+        st.markdown(md_intro_nearest.format(**dict_nearest))
 
+        # Map Nearest Stations
         st.plotly_chart(st.session_state.fig_nearest_stations, use_container_width=True)
-        COLS_TABLE = "title distance station_name".split()
-        COLS_NAME = "ID,DATASET,DISTANCE,STATION NAME".split(",")
-        with st.expander("Table Nearest Stations"):
-            st.dataframe(
-                DF_TABLE[COLS_TABLE]  # pylint: disable=unsubscriptable-object
-                .rename_axis("ID")
-                .rename(columns=dict(zip(COLS_TABLE, COLS_NAME[1:])))
-            )
 
+        # Table Nearest Stations
+        with st.expander("Table Nearest Stations"):
+            st.dataframe(table_nearest_updated)
+
+        # Summary Nearest Stataions
+        md_sum_nearest = mainfunc.load_markdown("docs/stations/05_sum_nearest.md")
+        st.markdown(md_sum_nearest.format(**dict_nearest))
+
+        IS_SECTION_NEAREST_DONE = True
+
+
+## Completeness Data
+
+st.markdown("### 📊 Data Kelengkapan Pengamatan")
+
+placeholder_completeness = st.empty()
+placeholder_completeness.info("Complete Nearest Stations to continue.")
+
+if IS_SECTION_NEAREST_DONE:
+    placeholder_completeness.write("HEHUEHUEHEUHEU")
 
 st.button("Refresh", key="sta_refresh")
