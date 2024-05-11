@@ -26,7 +26,7 @@ data_md = mainfunc.load_markdown("docs/rainitas.md")
 # ----------- START OF PAGE
 
 st.title("🌧️ RAINITAS")
-st.markdown(data_md)
+st.markdown(data_md, unsafe_allow_html=True)
 st.divider()
 
 # ----------- SETUP PAGE
