@@ -148,12 +148,12 @@ mytemplate.layout.bargap = 0
 # mytemplate.data.heatmap[0].textfont.family = _FONT_FAMILY
 mytemplate.data.heatmap[0].colorscale = "BlackBody"
 mytemplate.data.heatmap[0].colorbar.outlinecolor = "black"
-mytemplate.data.heatmap[0].colorbar.outlinewidth = 2
+mytemplate.data.heatmap[0].colorbar.outlinewidth = 1
 mytemplate.data.heatmap[0].colorbar.ticksuffix = "%"
-mytemplate.data.heatmap[0].colorbar.x = 1
-mytemplate.data.heatmap[0].colorbar.xpad = 10
-mytemplate.data.heatmap[0].colorbar.y = 0.5
-mytemplate.data.heatmap[0].colorbar.ypad = 20
+# mytemplate.data.heatmap[0].colorbar.x = 1
+# mytemplate.data.heatmap[0].colorbar.xpad = 10
+# mytemplate.data.heatmap[0].colorbar.y = 0.5
+# mytemplate.data.heatmap[0].colorbar.ypad = 20
 
 
 # SCATTERMAPBOX

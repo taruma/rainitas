@@ -1,6 +1,7 @@
 """Summary page"""
 
 import streamlit as st
+from src import mainfunc
 
 st.set_page_config(
     page_title="Rainitas | Summary",
@@ -13,6 +14,10 @@ st.set_page_config(
     },
 )
 
+mainfunc.main_sidebar()
+
 # ----------- START OF PAGE
+
+
 
 st.write("Hello World from Third Page")

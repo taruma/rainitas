@@ -277,7 +277,7 @@ def generate_nearest_stations_map(
 
     return go.Figure(data, layout)
 
-
+@st.cache_data
 def generate_completeness_heatmap(
     dataframe: pd.DataFrame, station_locations: pd.DataFrame = None
 ) -> go.Figure:
@@ -325,13 +325,13 @@ def generate_completeness_heatmap(
         # yaxis_tickangle=-90,
         yaxis_fixedrange=True,
         yaxis={"tickvals": y_label, "ticktext": table_percent.index},
-        margin={"t": 45, "l": 0, "r": 0, "b": 0},
+        margin={"t": 10, "l": 0, "r": 0, "b": 0},
         dragmode="zoom",
-        height=max(450, 45 * len(table_percent)),
-        showlegend=True,
+        height=250,
+        showlegend=False,
     )
 
-    return go.Figure(data, layout)
+    return go.Figure(data, layout).update_traces(showlegend=False)
 
 @st.cache_data
 def generate_completeness_bar(
@@ -378,13 +378,13 @@ def generate_completeness_bar(
         hovermode="x",
         bargap=0,
         dragmode="zoom",
-        showlegend=True,
+        showlegend=False,
         legend={
             "orientation": "h",
-            "yanchor": "bottom",
-            "y": 1.02,
+            "yanchor": "top",
             "xanchor": "left",
-            "x": 0.01,
+            "x": 0.0001,
+            "y": 1.19,
         },
         xaxis_title="<b>Date</b>",
         yaxis={
@@ -392,7 +392,8 @@ def generate_completeness_bar(
             "title": "<b>Percentage (%)</b>",
             "range": [0, 100],
         },
-        margin={"t": 45, "l": 0, "r": 0, "b": 0},
+        margin={"t": 10, "l": 0, "r": 20, "b": 20},
+        height=200,
     )
 
     return go.Figure(data, layout)

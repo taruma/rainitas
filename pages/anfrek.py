@@ -1,6 +1,7 @@
 """Anfrek page"""
 
 import streamlit as st
+from src import mainfunc
 
 st.set_page_config(
     page_title="Rainitas | Frequency Analysis",
@@ -12,6 +13,8 @@ st.set_page_config(
         "About": "Simple app to process rainfall data with AI.",
     },
 )
+
+mainfunc.main_sidebar()
 
 # ----------- START OF PAGE
 

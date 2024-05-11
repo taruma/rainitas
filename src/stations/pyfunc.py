@@ -99,6 +99,8 @@ def get_dataframe_from_folder(
 ) -> pd.DataFrame:
     """RETRIEVE ALL DATA FROM IDS"""
 
+    folder_dataset = Path(folder_dataset)
+
     dataframe_collection = []
     for stat_id in stat_ids:
         filename = combined_metadata.loc[stat_id, "filename"]

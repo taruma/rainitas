@@ -5,6 +5,6 @@ Dengan Rainitas, Anda dapat:
 *   📍 **Menjelajahi data stasiun hujan:**  visualisasikan lokasi, analisis kelengkapan data, dan temukan stasiun terdekat. 
 *   📈 **Menganalisis data hujan harian:** dapatkan informasi statistik, visualisasikan data dalam berbagai grafik, dan analisis data per periode (biweekly, monthly, yearly).
 *   🧮 **Melakukan analisis frekuensi:** hitung parameter statistik, tentukan distribusi data, analisis frekuensi dengan berbagai periode ulang, dan uji kecocokan distribusi.
-*   🤖 **Membuat narasi otomatis:**  fitur AI Rainitas akan menjelaskan hasil analisis Anda dalam bentuk teks yang mudah dipahami.
+<!-- *   🤖 **Membuat narasi otomatis:**  fitur AI Rainitas akan menjelaskan hasil analisis Anda dalam bentuk teks yang mudah dipahami. -->
 
 Rainitas adalah solusi lengkap untuk kebutuhan analisis data hujan Anda! 🎉
