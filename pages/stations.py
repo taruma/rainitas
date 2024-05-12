@@ -88,9 +88,7 @@ layout_rainfall_button = st.empty()
 
 with layout_rainfall_button.expander("Generate Analysis Using 🤖 GPT"):
     btn_generate_rainfall = st.button(
-        "Generate analysis of rainfall",
-        use_container_width=True,
-        disabled=False
+        "Generate analysis of rainfall", use_container_width=True, disabled=False
     )
 
 layout_rainfall_summary = st.empty()
@@ -403,7 +401,9 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
 
     with layout_rainfall_figure.container():
 
-        lrtab1, lrtab2, lrtab3 = st.tabs(["Grafik Hujan Harian", "Tabel Hujan Harian", "Statistik Hujan Harian"])
+        lrtab1, lrtab2, lrtab3 = st.tabs(
+            ["Grafik Hujan Harian", "Tabel Hujan Harian", "Statistik Hujan Harian"]
+        )
 
         with lrtab1:
             st.plotly_chart(

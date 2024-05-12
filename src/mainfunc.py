@@ -52,13 +52,13 @@ def generate_gpt(
     prompt="hello!",
     model="gpt-3.5-turbo",
     role_system="Kamu adalah ahli hidrologi yang akan membantu pengguna.",
-    openai_api_key=None
+    openai_api_key=None,
 ):
     """Generate text from the given prompt."""
 
     try:
-        now = datetime.now()
-        print(f"RUNNING GPT {now.strftime('%Y%m%d_%H%M%S')}")
+        # now = datetime.now()
+        # print(f"RUNNING GPT {now.strftime('%Y%m%d_%H%M%S')}")
 
         client = OpenAI(api_key=openai_api_key)
 
@@ -92,7 +92,7 @@ def create_to_session(kwargs):
 
     for key, value in kwargs.items():
         if key not in st.session_state:
-            print(f"{key} created")
+            # print(f"{key} created")
             st.session_state[key] = value
 
 
@@ -101,8 +101,8 @@ def update_to_session(kwargs):
 
     for key, value in kwargs.items():
         if key in st.session_state:
-            print(f"{key} updated")
+            # print(f"{key} updated")
             st.session_state[key] = value
         else:
-            print(f"{key} created via update")
+            # print(f"{key} created via update")
             st.session_state[key] = value
