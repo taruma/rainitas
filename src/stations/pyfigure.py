@@ -426,8 +426,17 @@ def generate_rainfall_scatter(
         hovermode="closest",
         xaxis_title="<b>Date</b>",
         yaxis_title="<b>Rainfall (mm)</b>",
-        legend_title="<b>Stations</b>",
-        margin={"t": 25, "l": 0, "r": 0, "b": 0},
+        # legend_title="<b>Stations</b>",
+        height=300,
+        margin={"t": 25, "l": 0, "r": 25, "b": 0},
+        legend={
+            'title': "<b>Stations</b>",
+            "orientation": "h",
+            "xanchor": "left",
+            "yanchor": "top",
+            "x": 0.005,
+            "y": 0.98,
+        },
     )
 
     return go.Figure(data, layout)
