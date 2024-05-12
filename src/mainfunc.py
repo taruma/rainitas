@@ -1,6 +1,6 @@
 """Collection of functions for doing my project."""
 
-from datetime import datetime
+# from datetime import datetime
 from openai import OpenAI
 import streamlit as st
 
