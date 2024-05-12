@@ -52,7 +52,7 @@ def generate_gpt(
     prompt="hello!",
     model="gpt-3.5-turbo",
     role_system="Kamu adalah ahli hidrologi yang akan membantu pengguna.",
-    openai_api_key=None,
+    openai_api_key=None
 ):
     """Generate text from the given prompt."""
 
@@ -60,7 +60,7 @@ def generate_gpt(
         now = datetime.now()
         print(f"RUNNING GPT {now.strftime('%Y%m%d_%H%M%S')}")
 
-        client = OpenAI(api_key=st.session_state.openai_api_key)
+        client = OpenAI(api_key=openai_api_key)
 
         completion = client.chat.completions.create(
             model=model,
@@ -73,7 +73,7 @@ def generate_gpt(
         message = completion.choices[0].message.content
 
         # REMOVE THIS PART WHEN LIVE
-        filename = f"prompt_{now.strftime('%Y%m%d_%H%M%S')}.txt"
+        filename = f"output_prompt/prompt_{now.strftime('%Y%m%d_%H%M%S')}.txt"
         with open(filename, "w", encoding="utf-8") as f:
             f.write("MODEL: " + model + "\n")
             f.write("\n[SYSTEM]\n" + role_system + "\n")
@@ -81,9 +81,10 @@ def generate_gpt(
             f.write("\n\n[RESPONSE]\n" + message + "\n")
 
         return message
-    
-    except Exception as e:
-        return "Error: " + str(e)
+
+    except Exception as e:  # pylint: disable=broad-except
+        st.toast("Error: " + str(e))
+        return ""
 
 
 def create_to_session(kwargs):

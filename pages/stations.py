@@ -68,12 +68,13 @@ layout_completeness_heatmap_figure = st.empty()
 layout_completeness_heatmap_figure.info("Complete Nearest Stations to continue.")
 layout_completeness_button = st.empty()
 
-with layout_completeness_button.container():
+with layout_completeness_button.expander("Generate Analysis Using GPT"):
+    st.text_input("OpenAI API Key", type="password", key="openai_api_key")
     st.selectbox("Select Model", ["gpt-3.5-turbo", "gpt-4-turbo"], key="gpt_model")
     btn_generate_completeness = st.button(
         "Generate Analysis Using 🤖 GPT",
         use_container_width=True,
-        disabled=True,
+        disabled=False,
     )
 
 
@@ -332,16 +333,20 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
                 generated_analysis = mainfunc.generate_gpt(
                     prompt=md_prompt_generate_analysis.format(**dict_comp_analysis),
                     model=st.session_state.gpt_model,
+                    openai_api_key=st.session_state.openai_api_key,
                 )
 
                 mainfunc.update_to_session(
                     {
                         "GPT_RESPONSE_COMPLETENESS": generated_analysis,
+                        "GPT_PROMPT_COMPLETENESS": md_prompt_generate_analysis.format(**dict_comp_analysis)
                     }
                 )
 
     if st.session_state.GPT_RESPONSE_COMPLETENESS is not None:
         with layout_completeness_heatmap_summary.container():
+            with st.expander("View Prompt"):
+                st.code(st.session_state.GPT_PROMPT_COMPLETENESS)
             st.markdown(st.session_state.GPT_RESPONSE_COMPLETENESS)
     else:
         with layout_completeness_heatmap_summary.container():
