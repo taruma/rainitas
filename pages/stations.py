@@ -371,8 +371,8 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
                 st.code(st.session_state.GPT_PROMPT_COMPLETENESS)
             st.markdown(st.session_state.GPT_RESPONSE_COMPLETENESS)
     else:
-        with layout_completeness_heatmap_summary.container():
-            st.markdown(md_heatmap_sum)
+        with layout_completeness_heatmap_summary.container(border=True):
+            st.markdown(md_heatmap_sum, unsafe_allow_html=True)
 
     ### GRAFIK HUJAN HARIAN
 
@@ -447,8 +447,8 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
                 st.code(st.session_state.GPT_PROMPT_RAINFALL)
             st.markdown(st.session_state.GPT_RESPONSE_RAINFALL)
     else:
-        with layout_rainfall_summary.container():
-            st.markdown(md_rainfall_sum)
+        with layout_rainfall_summary.container(border=True):
+            st.markdown(md_rainfall_sum, unsafe_allow_html=True)
 
     layout_closing.markdown(md_closing)
 
