@@ -7,7 +7,6 @@ plotly>=5.22
 python-dotenv>=1.0
 # fiako-stations
 geopy>=2.4
-pytables>=3.9
 # hidrokit-rainfall
 statsmodels>=0.14
 # fiako-anfrek
@@ -18,5 +17,6 @@ openai>=1.26
 pytest>=8.2
 
 # PIP
+tables>=3.9
 hidrokit>=0.5
 st-pages>=0.4

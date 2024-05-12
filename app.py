@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="auto",
     menu_items={
         "Report a bug": "https://github.com/taruma/rainitas/issues/new",
-        "About": "Simple app to process rainfall data with AI.",
+        "About": "Simple app to process rainfall data.",
     },
 )
 
