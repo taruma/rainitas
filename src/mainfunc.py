@@ -1,6 +1,6 @@
 """Collection of functions for doing my project."""
 
-from datetime import datetime
+# from datetime import datetime
 from openai import OpenAI
 import streamlit as st
 
@@ -52,33 +52,39 @@ def generate_gpt(
     prompt="hello!",
     model="gpt-3.5-turbo",
     role_system="Kamu adalah ahli hidrologi yang akan membantu pengguna.",
+    openai_api_key=None,
 ):
     """Generate text from the given prompt."""
 
-    now = datetime.now()
-    print(f"RUNNING GPT {now.strftime('%Y%m%d_%H%M%S')}")
+    try:
+        # now = datetime.now()
+        # print(f"RUNNING GPT {now.strftime('%Y%m%d_%H%M%S')}")
 
-    client = OpenAI(api_key=st.session_state.openai_api_key)
+        client = OpenAI(api_key=openai_api_key)
 
-    completion = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": role_system},
-            {"role": "user", "content": prompt},
-        ],
-    )
+        completion = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": role_system},
+                {"role": "user", "content": prompt},
+            ],
+        )
 
-    message = completion.choices[0].message.content
+        message = completion.choices[0].message.content
 
-    # REMOVE THIS PART WHEN LIVE
-    # filename = f"prompt_{now.strftime('%Y%m%d_%H%M%S')}.txt"
-    # with open(filename, "w", encoding="utf-8") as f:
-    #     f.write("MODEL: " + model + "\n")
-    #     f.write("\n[SYSTEM]\n" + role_system + "\n")
-    #     f.write("\n\n[USER]\n" + prompt + "\n")
-    #     f.write("\n\n[RESPONSE]\n" + message + "\n")
+        # REMOVE THIS PART WHEN LIVE
+        # filename = f"output_prompt/prompt_{now.strftime('%Y%m%d_%H%M%S')}.txt"
+        # with open(filename, "w", encoding="utf-8") as f:
+        #     f.write("MODEL: " + model + "\n")
+        #     f.write("\n[SYSTEM]\n" + role_system + "\n")
+        #     f.write("\n\n[USER]\n" + prompt + "\n")
+        #     f.write("\n\n[RESPONSE]\n" + message + "\n")
 
-    return message
+        return message
+
+    except Exception as e:  # pylint: disable=broad-except
+        st.toast("Error: " + str(e))
+        return ""
 
 
 def create_to_session(kwargs):
@@ -86,7 +92,7 @@ def create_to_session(kwargs):
 
     for key, value in kwargs.items():
         if key not in st.session_state:
-            print(f"{key} created")
+            # print(f"{key} created")
             st.session_state[key] = value
 
 
@@ -95,8 +101,8 @@ def update_to_session(kwargs):
 
     for key, value in kwargs.items():
         if key in st.session_state:
-            print(f"{key} updated")
+            # print(f"{key} updated")
             st.session_state[key] = value
         else:
-            print(f"{key} created via update")
+            # print(f"{key} created via update")
             st.session_state[key] = value
