@@ -18,6 +18,7 @@ st.set_page_config(
 
 # SETUP PAGES
 mainfunc.load_css("assets/mainstyles.css")
+mainfunc.load_state()
 mainfunc.main_sidebar()
 
 # LOADING MARKDOWN FILES
