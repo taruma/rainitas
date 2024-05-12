@@ -73,7 +73,7 @@ with layout_completeness_button.container():
     btn_generate_completeness = st.button(
         "Generate Analysis Using 🤖 GPT",
         use_container_width=True,
-        disabled=False,
+        disabled=True,
     )
 
 
