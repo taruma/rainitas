@@ -37,8 +37,8 @@ def main_sidebar():
 def load_state():
     """Load the state of the app."""
 
-    if "openai_api_key" not in st.session_state:
-        st.session_state.openai_api_key = st.secrets["OPENAI_API_KEY"]
+    # if "openai_api_key" not in st.session_state:
+    #     st.session_state.openai_api_key = st.secrets["OPENAI_API_KEY"]
 
     # print("//// Loading state...")
     for key, value in st.session_state.items():
@@ -71,12 +71,12 @@ def generate_gpt(
     message = completion.choices[0].message.content
 
     # REMOVE THIS PART WHEN LIVE
-    filename = f"prompt_{now.strftime('%Y%m%d_%H%M%S')}.txt"
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write("MODEL: " + model + "\n")
-        f.write("\n[SYSTEM]\n" + role_system + "\n")
-        f.write("\n\n[USER]\n" + prompt + "\n")
-        f.write("\n\n[RESPONSE]\n" + message + "\n")
+    # filename = f"prompt_{now.strftime('%Y%m%d_%H%M%S')}.txt"
+    # with open(filename, "w", encoding="utf-8") as f:
+    #     f.write("MODEL: " + model + "\n")
+    #     f.write("\n[SYSTEM]\n" + role_system + "\n")
+    #     f.write("\n\n[USER]\n" + prompt + "\n")
+    #     f.write("\n\n[RESPONSE]\n" + message + "\n")
 
     return message
 
