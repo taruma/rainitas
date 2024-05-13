@@ -70,7 +70,9 @@ layout_completeness_button = st.empty()
 
 with layout_completeness_button.expander("Generate Analysis Using 🤖 GPT"):
     st.text_input("OpenAI API Key", type="password", key="openai_api_key")
-    st.selectbox("Select Model", ["gpt-3.5-turbo", "gpt-4-turbo"], key="gpt_model")
+    st.selectbox(
+        "Select Model", ["gpt-4o", "gpt-3.5-turbo", "gpt-4-turbo"], key="gpt_model"
+    )
     btn_generate_completeness = st.button(
         "Generate analysis of completeness",
         use_container_width=True,
@@ -139,7 +141,9 @@ with layout_map_intro.container():
     st.markdown(md_map_intro.format(**data_intro_maps))
 
 with layout_map_figure.container():
-    tab1, tab2, tab3 = st.tabs(["Peta Stasiun", "Tabel Metadata Stasiun", "Informasi Dataset"])
+    tab1, tab2, tab3 = st.tabs(
+        ["Peta Stasiun", "Tabel Metadata Stasiun", "Informasi Dataset"]
+    )
 
     with tab1:
         st.plotly_chart(fig_map, use_container_width=True)
@@ -178,7 +182,7 @@ with layout_map_input.container():
         btn_coordinate = st.button(
             ":round_pushpin: Find Nearest Stations",
             use_container_width=True,
-            type="primary"
+            type="primary",
         )
 
 ### Validate Input
