@@ -3,7 +3,6 @@
 import streamlit as st
 import plotly.io as pio
 
-# from openai import OpenAI
 from src.stations import pyfunc, pyfigure
 from src.stations import pytemplate
 from src import mainfunc, stationsfunc
@@ -140,7 +139,7 @@ with layout_map_intro.container():
     st.markdown(md_map_intro.format(**data_intro_maps))
 
 with layout_map_figure.container():
-    tab1, tab2, tab3 = st.tabs(["Peta Stasiun", "Metadata", "Informasi Metadata"])
+    tab1, tab2, tab3 = st.tabs(["Peta Stasiun", "Tabel Metadata Stasiun", "Informasi Dataset"])
 
     with tab1:
         st.plotly_chart(fig_map, use_container_width=True)
@@ -179,6 +178,7 @@ with layout_map_input.container():
         btn_coordinate = st.button(
             ":round_pushpin: Find Nearest Stations",
             use_container_width=True,
+            type="primary"
         )
 
 ### Validate Input
@@ -199,8 +199,8 @@ if not is_all_valid:
         - Longitude: {EMOJI_CHECK[IS_LON_VALID]} \n
         """
     )
-    del st.session_state.table_nearest_stations
-    del st.session_state.fig_nearest_stations
+    st.session_state.table_nearest_stations = None
+    st.session_state.fig_nearest_stations = None
     st.session_state.IS_NEAREST_SECTION_DONE = False
 
 ### Find Nearest Stations (table and map)
