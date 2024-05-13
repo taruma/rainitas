@@ -1,4 +1,4 @@
-<small><i>Analisis berikut merupakan placeholder untuk input default</i></small>
+:red-background[_Analisis awal akan ditampilkan di sini sebagai pratinjau. Klik tombol :blue-background['Generate'] untuk menghasilkan analisis menggunakan GPT._]
 
 Berdasarkan data statistik hujan untuk stasiun-stasiun yang diperiksa, kita dapat melihat variasi jumlah observasi (count), nilai rata-rata (mean), dan standar deviasi (std) tidak hanya menunjukkan perbedaan curah hujan harian di setiap stasiun tetapi juga mengindikasikan adanya variasi intensitas hujan di wilayah yang berbeda. Misalnya, :blue-background[kg_96747 - **Halim Perdana Kusuma Jakarta**] memiliki rata-rata curah hujan harian tertinggi yaitu :blue-background[10.6368 mm] dan nilai maksimal curah hujan harian sangat tinggi sebesar :blue-background[305.0 mm]. Hal ini menunjukkan bahwa wilayah Halim Perdana Kusuma Jakarta cenderung memiliki hari-hari dengan hujan yang lebih berat dibandingkan dengan stasiun lain seperti :blue-background[kg_96749 - **Stasiun Meteorologi Soekarno Hatta**] yang memiliki rata-rata curah hujan harian paling rendah sebesar :blue-background[5.3403 mm].
 

@@ -10,6 +10,6 @@ Pada halaman ini Anda dapat:
 
 *   **Menjelajahi Stasiun Hujan:** Temukan stasiun hujan yang Anda butuhkan dengan mudah melalui peta interaktif dan daftar stasiun.
 *   **Melihat Stasiun Terdekat:** Menampilkan stasiun terdekat dengan titik tinjauan Anda. 
-*   **Melihat Kelengkapan Data:** Lihat persentase kelengkapan data hujan harian untuk setiap stasiun terdekat.
+*   **Mengevaluasi Kelengkapan Data:** Lihat persentase kelengkapan data hujan harian untuk setiap stasiun terdekat.
 *   **Memvisualisasikan Data Hujan:** Lihat pola dan tren curah hujan melalui grafik yang informatif.
 *   **Mengunduh Data:** Dapatkan data hujan harian dalam format CSV untuk analisis lebih lanjut menggunakan aplikasi lain. 
