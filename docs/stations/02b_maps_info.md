@@ -18,7 +18,7 @@ Dataset terdiri berbagai stasiun meteorologi dan geofisika di Indonesia, dengan 
 
 **Konteks Data:**
 
-* Data curah hujan tampaknya bersumber dari Kaggle, khususnya dataset yang dibagikan oleh pengguna "Greegtitan".
+* Data curah hujan bersumber dari Kaggle, khususnya dataset yang dibagikan oleh pengguna "Greegtitan".
 * Data disimpan dalam format file HDF5 (.h5), yang umum digunakan untuk menyimpan data ilmiah dalam jumlah besar.
 * Terdapat informasi tentang periode ketersediaan data curah hujan untuk setiap stasiun, yang bervariasi dari tahun 2010 hingga 2020. 
 * Beberapa stasiun memiliki data yang tidak lengkap atau periode data yang lebih pendek dibandingkan dengan yang lain.
