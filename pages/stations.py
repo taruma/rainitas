@@ -146,17 +146,14 @@ data_maps_intro = {
 }
 
 fig_map = pyfigure.generate_station_map_figure(metadata_rainfall)
-
 pg_map_intro = md_map_intro.format(**data_maps_intro)
+mainfunc.update_to_session({
+    'pg_map_intro': pg_map_intro,
+    'fig_map': fig_map
+})
 
 with layout_map_intro.container():
-
     st.markdown(pg_map_intro)
-
-    mainfunc.update_to_session({
-        'pg_map_intro': pg_map_intro,
-        'fig_map': fig_map
-    })
 
 TABTITLE_MAP = ["Peta Stasiun", "Tabel Metadata Stasiun", "Informasi Dataset"]
 
