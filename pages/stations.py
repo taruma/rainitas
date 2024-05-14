@@ -99,7 +99,7 @@ layout_closing = st.empty()
 layout_closing.warning("Complete all sections to finish.")
 
 # LOAD MD
-md_introduction = mainfunc.load_markdown("docs/stations/01_intro.md")
+pg_introduction = mainfunc.load_markdown("docs/stations/01_intro.md")
 md_map_intro = mainfunc.load_markdown("docs/stations/02a_maps_intro.md")
 md_map_info = mainfunc.load_markdown("docs/stations/02b_maps_info.md")
 md_map_input_coordinate = mainfunc.load_markdown(
@@ -114,9 +114,32 @@ md_rainfall_intro = mainfunc.load_markdown("docs/stations/06a_rainfall_intro.md"
 md_rainfall_sum = mainfunc.load_markdown("docs/stations/06b_rainfall_sum.md")
 md_closing = mainfunc.load_markdown("docs/stations/07_closing.md")
 
-# MAIN APPS
 
-data_intro_maps = {
+# ----------- START OF PAGE
+
+PG_TITLE = ":round_pushpin: Eksplorasi Data Hujan :round_pushpin:"
+PG_SUBHEADER = "Mengakses dan Mengakuisisi Data Hujan"
+
+with layout_title.container():
+    st.title(PG_TITLE)
+    st.subheader(PG_SUBHEADER)
+
+    mainfunc.update_to_session({
+        'pg_title': PG_TITLE,
+        'pg_subheader': PG_SUBHEADER
+    })
+
+## Introduction
+with layout_intro.container():
+    st.markdown(pg_introduction, unsafe_allow_html=True)
+
+    mainfunc.update_to_session({
+        'pg_intro': pg_introduction
+    })
+
+## Map of Stations
+
+data_maps_intro = {
     "dataset_name": "Kaggle - greegtitan/indonesia-climate",
     "dataset_link": "https://www.kaggle.com/datasets/greegtitan/indonesia-climate",
     "total_stations": len(metadata_rainfall),
@@ -124,25 +147,23 @@ data_intro_maps = {
 
 fig_map = pyfigure.generate_station_map_figure(metadata_rainfall)
 
-# ----------- START OF PAGE
-
-with layout_title.container():
-    st.title(":round_pushpin: Eksplorasi Data Hujan :round_pushpin:")
-    st.subheader("Mengakses dan Mengakuisisi Data Hujan")
-
-## Introduction
-
-with layout_intro.container():
-    st.markdown(md_introduction, unsafe_allow_html=True)
-
-## Map of Stations
+pg_map_intro = md_map_intro.format(**data_maps_intro)
 
 with layout_map_intro.container():
-    st.markdown(md_map_intro.format(**data_intro_maps))
+
+    st.markdown(pg_map_intro)
+
+    mainfunc.update_to_session({
+        'pg_map_intro': pg_map_intro,
+        'fig_map': fig_map
+    })
+
+TABTITLE_MAP = ["Peta Stasiun", "Tabel Metadata Stasiun", "Informasi Dataset"]
 
 with layout_map_figure.container():
+
     tab1, tab2, tab3 = st.tabs(
-        ["Peta Stasiun", "Tabel Metadata Stasiun", "Informasi Dataset"]
+        TABTITLE_MAP
     )
 
     with tab1:
