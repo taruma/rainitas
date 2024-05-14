@@ -39,7 +39,7 @@ mainfunc.create_to_session(
     }
 )
 
-# LAYOUT
+# LAYOUT ELEMENTS (DEFAULT STATE)
 
 layout_title = st.empty()
 layout_intro = st.empty()
@@ -98,13 +98,12 @@ st.markdown("## 🚪 Penutup")
 layout_closing = st.empty()
 layout_closing.warning("Complete all sections to finish.")
 
-# LOAD MD
+# LOAD MARKDOWN TEMPLATES
+
 pg_introduction = mainfunc.load_markdown("docs/stations/01_intro.md")
-md_map_intro = mainfunc.load_markdown("docs/stations/02a_maps_intro.md")
-md_map_info = mainfunc.load_markdown("docs/stations/02b_maps_info.md")
-md_map_input_coordinate = mainfunc.load_markdown(
-    "docs/stations/02c_map_input_coordinate.md"
-)
+md_map_intro = mainfunc.load_markdown("docs/stations/02a_map_intro.md")
+pg_map_info = mainfunc.load_markdown("docs/stations/02b_map_info.md")
+pg_map_coordinate = mainfunc.load_markdown("docs/stations/02c_map_coordinate.md")
 md_nearest_intro = mainfunc.load_markdown("docs/stations/03a_nearest_intro.md")
 md_nearest_sum = mainfunc.load_markdown("docs/stations/03b_nearest_sum.md")
 md_completeness_intro = mainfunc.load_markdown("docs/stations/04_complete_intro.md")
@@ -117,85 +116,98 @@ md_closing = mainfunc.load_markdown("docs/stations/07_closing.md")
 
 # ----------- START OF PAGE
 
-PG_TITLE = ":round_pushpin: Eksplorasi Data Hujan :round_pushpin:"
-PG_SUBHEADER = "Mengakses dan Mengakuisisi Data Hujan"
-
+# Title
 with layout_title.container():
+    PG_TITLE = ":round_pushpin: Eksplorasi Data Hujan :round_pushpin:"
+    PG_SUBHEADER = "Mengakses dan Mengakuisisi Data Hujan"
     st.title(PG_TITLE)
     st.subheader(PG_SUBHEADER)
 
-    mainfunc.update_to_session({
-        'pg_title': PG_TITLE,
-        'pg_subheader': PG_SUBHEADER
-    })
 
-## Introduction
+# Introduction
 with layout_intro.container():
     st.markdown(pg_introduction, unsafe_allow_html=True)
 
-    mainfunc.update_to_session({
-        'pg_intro': pg_introduction
-    })
+    mainfunc.update_to_session({"pg_intro": pg_introduction})
 
-## Map of Stations
-
-data_maps_intro = {
-    "dataset_name": "Kaggle - greegtitan/indonesia-climate",
-    "dataset_link": "https://www.kaggle.com/datasets/greegtitan/indonesia-climate",
-    "total_stations": len(metadata_rainfall),
-}
-
-fig_map = pyfigure.generate_station_map_figure(metadata_rainfall)
-pg_map_intro = md_map_intro.format(**data_maps_intro)
-mainfunc.update_to_session({
-    'pg_map_intro': pg_map_intro,
-    'fig_map': fig_map
-})
-
+# MAP 1 (INTRO)
 with layout_map_intro.container():
+    ## data
+    DATA_MAPS_INTRO = {
+        "dataset_name": "Kaggle - greegtitan/indonesia-climate",
+        "dataset_link": "https://www.kaggle.com/datasets/greegtitan/indonesia-climate",
+        "total_stations": len(metadata_rainfall),
+    }
+
+    pg_map_intro = md_map_intro.format(**DATA_MAPS_INTRO)
+
+    ## layout
     st.markdown(pg_map_intro)
 
-TABTITLE_MAP = ["Peta Stasiun", "Tabel Metadata Stasiun", "Informasi Dataset"]
+    ## save
+    mainfunc.update_to_session({"pg_map_intro": pg_map_intro})
 
+# MAP 2 (FIGURE)
 with layout_map_figure.container():
+    ## data
+    TABTITLE_MAP = ["Peta Stasiun", "Tabel Metadata Stasiun", "Informasi Dataset"]
 
-    tab1, tab2, tab3 = st.tabs(
-        TABTITLE_MAP
-    )
+    fig_map = pyfigure.generate_station_map_figure(metadata_rainfall)
 
+    ## layout
+    tab1, tab2, tab3 = st.tabs(TABTITLE_MAP)
     with tab1:
         st.plotly_chart(fig_map, use_container_width=True)
     with tab2:
         st.dataframe(metadata_rainfall)
     with tab3:
         with st.container(border=True):
-            st.markdown(md_map_info, unsafe_allow_html=True)
+            st.markdown(pg_map_info, unsafe_allow_html=True)
+
+    ## save
+    mainfunc.update_to_session({"fig_map": fig_map, "pg_map_info": pg_map_info})
 
 
-## Input Coordinate
-
+# INPUT COORDINATE
 with layout_map_input.container():
-    st.markdown(md_map_input_coordinate, unsafe_allow_html=True)
+    ## data
+    ## DEFAULT DATA
+    MY_COORDINATE = "Queensdale"
+    MY_LATITUDE = "-6.2631"
+    MY_LONGITUDE = "106.8095"
+    MY_RADIUS = 25
+    MY_TOTAL_NEAREST = 10
+
+    ## layout
+    st.markdown(pg_map_coordinate, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
 
     with col1:
         coordinate_name = st.text_input(
-            "Coordinate Name / Nama Koordinat", "TinjauanKu", key="coordinate_name"
+            "Coordinate Name",
+            MY_COORDINATE,
+            key="coordinate_name",
         )
 
     with col2:
         latitude = st.text_input(
-            "Latitude / Lintang Derajat", "-6.2631", key="latitude"
+            "Latitude / Lintang Derajat", MY_LATITUDE, key="latitude"
         )
         longitude = st.text_input(
-            "Longitude / Bujur Derajat", "106.8095", key="longitude"
+            "Longitude / Bujur Derajat", MY_LONGITUDE, key="longitude"
         )
 
     with col3:
-        radius_km = st.number_input("Radius (km)", 1, step=1, value=25, key="radius_km")
-        num_nearest = st.number_input(
-            "Total Stations", 1, step=1, value=10, key="num_nearest"
+        radius_km = st.number_input(
+            "Radius (km)", min_value=1, step=1, value=MY_RADIUS, key="radius_km"
+        )
+        nearest_stations_limit = st.number_input(
+            "Maximum Number of Nearest Stations",
+            min_value=1,
+            step=1,
+            value=MY_TOTAL_NEAREST,
+            key="nearest_station_limit",
         )
         btn_coordinate = st.button(
             ":round_pushpin: Find Nearest Stations",
@@ -203,7 +215,7 @@ with layout_map_input.container():
             type="primary",
         )
 
-### Validate Input
+# INPUT VALIDATION
 
 IS_NAME_VALID = (coordinate_name is not None) and (coordinate_name != "")
 IS_LAT_VALID = pyfunc.validate_single_coordinate(latitude, "lat")
@@ -213,6 +225,8 @@ is_all_valid = IS_LAT_VALID and IS_LON_VALID and IS_NAME_VALID
 
 if not is_all_valid:
     EMOJI_CHECK = [":x:", ":heavy_check_mark:"]
+
+    # error message
     layout_map_validate.error(
         f"""
         Please input the coordinate information correctly.\n
@@ -221,17 +235,20 @@ if not is_all_valid:
         - Longitude: {EMOJI_CHECK[IS_LON_VALID]} \n
         """
     )
+
+    # reset state
     st.session_state.table_nearest_stations = None
     st.session_state.fig_nearest_stations = None
     st.session_state.IS_NEAREST_SECTION_DONE = False
 
-### Find Nearest Stations (table and map)
+# FIND NEAREST STATIONS - DATA / ACTION
+# GET TABLE AND FIGURE IF BUTTON IS CLICKED AND ALL VALID
 
 if btn_coordinate and is_all_valid:
     coordinate_point = f"{latitude},{longitude}"
 
     table_nearest_stations = stationsfunc.get_nearest_stations(
-        coordinate_point, metadata_rainfall, radius_km, num_nearest
+        coordinate_point, metadata_rainfall, radius_km, nearest_stations_limit
     )
 
     fig_nearest_stations = pyfigure.generate_nearest_stations_map(
@@ -246,11 +263,12 @@ if btn_coordinate and is_all_valid:
             "prev_latitude": latitude,
             "prev_longitude": longitude,
             "prev_radius_km": radius_km,
-            "prev_num_nearest": num_nearest,
+            "prev_nearest_stations_limit": nearest_stations_limit,
         }
     )
 
-### Display Nearest Stations
+# FIND NEAREST STATIONS - DISPLAY
+# DISPLAY ONLY FIGURE IS SAVED IN SESSION STATE AND ALL VALID 
 
 if st.session_state.get("fig_nearest_stations") is not None and is_all_valid:
 
@@ -258,12 +276,12 @@ if st.session_state.get("fig_nearest_stations") is not None and is_all_valid:
         st.session_state.table_nearest_stations
     )
 
-    dict_nearest = {
+    data_nearest = {
         "coordinate_name": st.session_state.prev_coordinate_name,
         "latitude": st.session_state.prev_latitude,
         "longitude": st.session_state.prev_longitude,
         "radius_km": st.session_state.prev_radius_km,
-        "n_nearest": st.session_state.prev_num_nearest,
+        "nearest_stations_limit": st.session_state.prev_nearest_stations_limit,
         "total_nearest_stations": len(table_nearest_updated),
         "nearest_stations_name": ", ".join(
             table_nearest_updated["STATION NAME"].tolist()
@@ -275,7 +293,7 @@ if st.session_state.get("fig_nearest_stations") is not None and is_all_valid:
     }
 
     with layout_nearest_intro.container():
-        st.markdown(md_nearest_intro.format(**dict_nearest))
+        st.markdown(md_nearest_intro.format(**data_nearest))
 
     with layout_nearest_map.container():
         tab1, tab2 = st.tabs(["Peta Stasiun Terdekat", "Tabel Stasiun Terdekat"])
@@ -288,12 +306,12 @@ if st.session_state.get("fig_nearest_stations") is not None and is_all_valid:
             st.dataframe(table_nearest_updated)
 
     with layout_nearest_summary.container():
-        st.markdown(md_nearest_sum.format(**dict_nearest))
+        st.markdown(md_nearest_sum.format(**data_nearest))
 
     st.session_state.IS_NEAREST_SECTION_DONE = True
 
 
-## Completeness Data
+# Completeness Data
 
 if st.session_state.IS_NEAREST_SECTION_DONE:
 
@@ -332,7 +350,7 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
         st.markdown(md_completeness_intro)
 
     with layout_completeness_heatmap_intro.container():
-        st.markdown(md_heatmap_intro.format(**dict_nearest))
+        st.markdown(md_heatmap_intro.format(**data_nearest))
 
     with layout_completeness_heatmap_figure.container():
         tab1, tab2, tab3 = st.tabs(
@@ -396,7 +414,7 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
         with layout_completeness_heatmap_summary.container(border=True):
             st.markdown(md_heatmap_sum, unsafe_allow_html=True)
 
-    ### GRAFIK HUJAN HARIAN
+    # GRAFIK HUJAN HARIAN
 
     id_name_nearest_stations = []
     for ids, station_name in zip(

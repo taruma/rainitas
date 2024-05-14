@@ -40,11 +40,11 @@ def load_state():
     # if "openai_api_key" not in st.session_state:
     #     st.session_state.openai_api_key = st.secrets["OPENAI_API_KEY"]
 
-    # print("//// Loading state...")
+    print("//// Loading state...")
     for key, value in st.session_state.items():
-        # print(f"{key}: {type(value)}")
+        print(f"{key}: {type(value)}")
         st.session_state[key] = value
-    # print("//// Loading state... done")
+    print("//// Loading state... done")
 
 
 @st.cache_data
