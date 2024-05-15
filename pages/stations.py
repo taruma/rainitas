@@ -159,7 +159,7 @@ with layout_map_figure.container():
     with tab1:
         st.plotly_chart(fig_map, use_container_width=True)
     with tab2:
-        st.dataframe(metadata_rainfall)
+        st.dataframe(metadata_rainfall, use_container_width=True)
     with tab3:
         with st.container(border=True):
             st.markdown(pg_map_info, unsafe_allow_html=True)
@@ -268,9 +268,11 @@ if btn_coordinate and is_all_valid:
     )
 
 # FIND NEAREST STATIONS - DISPLAY
-# DISPLAY ONLY FIGURE IS SAVED IN SESSION STATE AND ALL VALID 
+# DISPLAY ONLY FIGURE IS SAVED IN SESSION STATE AND ALL VALID
 
 if st.session_state.get("fig_nearest_stations") is not None and is_all_valid:
+
+    ## data
 
     table_nearest_updated = stationsfunc.rename_table_nearest(
         st.session_state.table_nearest_stations
@@ -292,28 +294,46 @@ if st.session_state.get("fig_nearest_stations") is not None and is_all_valid:
         "farthest_station_distance": table_nearest_updated.iloc[-1]["DISTANCE"],
     }
 
+    pg_nearest_intro = md_nearest_intro.format(**data_nearest)
+    pg_nearest_sum = md_nearest_sum.format(**data_nearest)
+
+    ## layout
+
     with layout_nearest_intro.container():
-        st.markdown(md_nearest_intro.format(**data_nearest))
+        st.markdown(pg_nearest_intro)
 
     with layout_nearest_map.container():
-        tab1, tab2 = st.tabs(["Peta Stasiun Terdekat", "Tabel Stasiun Terdekat"])
+        TABTITLE_NEAREST = ["Peta Stasiun Terdekat", "Tabel Stasiun Terdekat"]
+        tab1, tab2 = st.tabs(TABTITLE_NEAREST)
 
         with tab1:
             st.plotly_chart(
                 st.session_state.fig_nearest_stations, use_container_width=True
             )
         with tab2:
-            st.dataframe(table_nearest_updated)
+            st.dataframe(table_nearest_updated, use_container_width=True)
 
     with layout_nearest_summary.container():
-        st.markdown(md_nearest_sum.format(**data_nearest))
+        st.markdown(pg_nearest_sum)
+
+    ## session
 
     st.session_state.IS_NEAREST_SECTION_DONE = True
+
+    mainfunc.update_to_session(
+        {
+            "pg_nearest_intro": pg_nearest_intro,
+            "pg_nearest_sum": pg_nearest_sum,
+            "table_nearest_update": table_nearest_updated,
+        }
+    )
 
 
 # Completeness Data
 
 if st.session_state.IS_NEAREST_SECTION_DONE:
+
+    ## data
 
     ids_nearest_stations = table_nearest_updated.index.tolist()
 
@@ -368,11 +388,11 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
                 config={"displayModeBar": False},
             )
         with tab2:
-            st.dataframe(completeness_df)
+            st.dataframe(completeness_df, use_container_width=True)
         with tab3:
             for (i, tab), station_id in zip(enumerate(bar_names), ids_nearest_stations):
                 st.markdown(f"###### 🌧️ {station_id} - {tab} 🌧️")
-                st.plotly_chart(
+                st.plotly_chart(b
                     graph_bars[i],
                     use_container_width=True,
                     config={"displayModeBar": False},
@@ -450,9 +470,9 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
                 fig_rainfall, use_container_width=True, config={"displayModeBar": False}
             )
         with lrtab2:
-            st.dataframe(rainfall_df)
+            st.dataframe(rainfall_df, use_container_width=True)
         with lrtab3:
-            st.dataframe(rainfall_df.describe())
+            st.dataframe(rainfall_df.describe(), use_container_width=True)
 
     if btn_generate_rainfall:
         with layout_rainfall_summary.container():
