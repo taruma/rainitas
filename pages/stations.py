@@ -392,7 +392,7 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
         with tab3:
             for (i, tab), station_id in zip(enumerate(bar_names), ids_nearest_stations):
                 st.markdown(f"###### 🌧️ {station_id} - {tab} 🌧️")
-                st.plotly_chart(b
+                st.plotly_chart(
                     graph_bars[i],
                     use_container_width=True,
                     config={"displayModeBar": False},
