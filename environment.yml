@@ -9,6 +9,7 @@ dependencies:
   - pandas>=2.2
   - plotly>=5.22
   - python-dotenv>=1.0
+  - tabulate>=0.9
   # fiako-stations
   - geopy>=2.4
   - pytables>=3.9
@@ -23,4 +24,3 @@ dependencies:
   - pip
   - pip:
     - hidrokit>=0.5
-    - st-pages>=0.4
