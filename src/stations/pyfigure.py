@@ -399,7 +399,7 @@ def generate_completeness_bar(
     return go.Figure(data, layout)
 
 @st.cache_data
-def generate_rainfall_scatter(
+def generated_rainfall_figure(
     rainfall_data: pd.DataFrame, rainfall_metadata: pd.DataFrame
 ) -> go.Figure:
     """
