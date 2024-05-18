@@ -30,17 +30,17 @@ metadata_completeness = pyfunc.read_metadata_csv("data/completeness")
 
 # LOAD MARKDOWN TEMPLATES
 pg_introduction = mainfunc.load_markdown("docs/stations/01_intro.md")
-md_map_intro = mainfunc.load_markdown("docs/stations/02a_map_intro.md")
-pg_map_info = mainfunc.load_markdown("docs/stations/02b_map_info.md")
-pg_map_coordinate = mainfunc.load_markdown("docs/stations/02c_map_coordinate.md")
-md_nearest_intro = mainfunc.load_markdown("docs/stations/03a_nearest_intro.md")
-md_nearest_sum = mainfunc.load_markdown("docs/stations/03b_nearest_sum.md")
-pg_completeness_intro = mainfunc.load_markdown("docs/stations/04_complete_intro.md")
-md_heatmap_intro = mainfunc.load_markdown("docs/stations/05a_heatmap_intro.md")
-pg_template_heatmap_sum = mainfunc.load_markdown("docs/stations/05b_heatmap_sum.md")
-md_rainfall_intro = mainfunc.load_markdown("docs/stations/06a_rainfall_intro.md")
-pg_template_rainfall_sum = mainfunc.load_markdown("docs/stations/06b_rainfall_sum.md")
-pg_closing = mainfunc.load_markdown("docs/stations/07_closing.md")
+md_map_intro = mainfunc.load_markdown("docs/stations/02_template_map_intro.md")
+pg_map_info = mainfunc.load_markdown("docs/stations/03_map_info.md")
+pg_map_coordinate = mainfunc.load_markdown("docs/stations/04_template_map_coordinate.md")
+md_nearest_intro = mainfunc.load_markdown("docs/stations/05_template_nearest_intro.md")
+md_nearest_sum = mainfunc.load_markdown("docs/stations/06_template_nearest_summary.md")
+pg_completeness_intro = mainfunc.load_markdown("docs/stations/07_completeness_intro.md")
+md_heatmap_intro = mainfunc.load_markdown("docs/stations/08_template_heatmap_intro.md")
+pg_template_heatmap_sum = mainfunc.load_markdown("docs/stations/09_placeholder_heatmap_summary.md")
+md_rainfall_intro = mainfunc.load_markdown("docs/stations/10_template_rainfall_intro.md")
+pg_template_rainfall_sum = mainfunc.load_markdown("docs/stations/11_placeholder_rainfall_summary.md")
+pg_closing = mainfunc.load_markdown("docs/stations/12_placeholder_closing.md")
 
 
 # LOAD PROMPT TEMPLATES
