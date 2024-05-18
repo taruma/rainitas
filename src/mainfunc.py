@@ -87,8 +87,8 @@ def generate_gpt(
         return ""
 
 
-def create_to_session(kwargs):
-    """Create the given kwargs to the session state."""
+def session_state_create(kwargs):
+    """Create the given kwargs to the session state if not exist."""
 
     for key, value in kwargs.items():
         if key not in st.session_state:
@@ -96,8 +96,8 @@ def create_to_session(kwargs):
             st.session_state[key] = value
 
 
-def update_to_session(kwargs):
-    """Update the given kwargs to the session state."""
+def session_state_update(kwargs):
+    """Update the given kwargs to the session state and create if not exist."""
 
     for key, value in kwargs.items():
         if key in st.session_state:

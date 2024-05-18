@@ -7,6 +7,8 @@ from src.stations import pyfunc, pyfigure
 from src.stations import pytemplate
 from src import mainfunc, stationsfunc
 
+# SETUP PAGE
+
 pio.templates.default = pytemplate.mytemplate
 
 st.set_page_config(
@@ -20,54 +22,98 @@ st.set_page_config(
     },
 )
 
-mainfunc.load_css("assets/stations.css")
-mainfunc.main_sidebar()
-
-# INITIALIZE / LOAD DATA
-
-metadata_rainfall = pyfunc.read_metadata_csv("data/rainfall")
-metadata_completeness = pyfunc.read_metadata_csv("data/completeness")
-
-# LOAD MARKDOWN TEMPLATES
-pg_introduction = mainfunc.load_markdown("docs/stations/01_intro.md")
-md_map_intro = mainfunc.load_markdown("docs/stations/02_template_map_intro.md")
-pg_map_info = mainfunc.load_markdown("docs/stations/03_map_info.md")
-pg_map_coordinate = mainfunc.load_markdown(
-    "docs/stations/04_template_map_coordinate.md"
-)
-md_nearest_intro = mainfunc.load_markdown("docs/stations/05_template_nearest_intro.md")
-md_nearest_sum = mainfunc.load_markdown("docs/stations/06_template_nearest_summary.md")
-pg_completeness_intro = mainfunc.load_markdown("docs/stations/07_completeness_intro.md")
-md_heatmap_intro = mainfunc.load_markdown("docs/stations/08_template_heatmap_intro.md")
-pg_template_heatmap_sum = mainfunc.load_markdown(
-    "docs/stations/09_placeholder_heatmap_summary.md"
-)
-md_rainfall_intro = mainfunc.load_markdown(
-    "docs/stations/10_template_rainfall_intro.md"
-)
-pg_template_rainfall_sum = mainfunc.load_markdown(
-    "docs/stations/11_placeholder_rainfall_summary.md"
-)
-pg_closing = mainfunc.load_markdown("docs/stations/12_placeholder_closing.md")
-
-
-# LOAD PROMPT TEMPLATES
-prompt_template_completeness = mainfunc.load_markdown(
-    "prompt/stations/prompt_completeness.md"
-)
-prompt_template_rainfall = mainfunc.load_markdown(
-    "prompt/stations/prompt_rainfall_data.md"
-)
-
 # SESSION STATE INITIALIZATION
-mainfunc.create_to_session(
+
+mainfunc.session_state_create(
     {
         "IS_INPUT_VALID": False,
         "IS_NEAREST_SECTION_DONE": False,
         "GPT_RESPONSE_COMPLETENESS": None,
         "GPT_RESPONSE_RAINFALL": None,
+        "coordinate_name": "Queensdale",
+        "latitude": "-6.2631",
+        "longitude": "106.8095",
+        "radius_km": 25,
+        "nearest_station_limit": 10,
     }
 )
+
+# LOAD CSS & SIDEBAR
+mainfunc.load_css("assets/stations.css")
+mainfunc.main_sidebar()
+
+
+# INITIALIZE / LOAD DATA
+@st.cache_data
+def load_metadata():
+    """Load metadata from CSV files."""
+
+    rainfall = pyfunc.read_metadata_csv("data/rainfall")
+    completeness = pyfunc.read_metadata_csv("data/completeness")
+
+    return rainfall, completeness
+
+
+@st.cache_data
+def load_templates():
+    """Load markdown files."""
+
+    markdown_file_path = {
+        "abstract": "docs/stations/abstract.md",
+        "map_intro": "docs/stations/map_intro_template.md",
+        "map_info": "docs/stations/map_info.md",
+        "map_coordinate": "docs/stations/map_coordinate_template.md",
+        "nearest_intro": "docs/stations/nearest_intro_template.md",
+        "nearest_summary": "docs/stations/nearest_summary_template.md",
+        "completeness_intro": "docs/stations/completeness_intro.md",
+        "heatmap_intro": "docs/stations/heatmap_intro_template.md",
+        "heatmap_summary": "docs/stations/heatmap_summary_placeholder.md",
+        "rainfall_intro": "docs/stations/rainfall_intro_template.md",
+        "rainfall_summary": "docs/stations/rainfall_summary_placeholder.md",
+        "closing": "docs/stations/closing_placeholder.md",
+    }
+
+    loaded_markdown_files = {
+        key: mainfunc.load_markdown(value) for key, value in markdown_file_path.items()
+    }
+
+    loaded_prompt_files = {
+        "completeness": mainfunc.load_markdown(
+            "prompt/stations/prompt_completeness.md"
+        ),
+        "rainfall": mainfunc.load_markdown("prompt/stations/prompt_rainfall_data.md"),
+    }
+
+    return loaded_markdown_files, loaded_prompt_files
+
+
+metadata_rainfall, metadata_completeness = load_metadata()
+markdown_templates, prompt_templates = load_templates()
+
+# LOAD MARKDOWN TEMPLATES
+text_abstract = markdown_templates["abstract"]
+
+template_map_intro = markdown_templates["map_intro"]
+text_map_info = markdown_templates["map_info"]
+template_map_coordinate = markdown_templates["map_coordinate"]
+
+template_nearest_intro = markdown_templates["nearest_intro"]
+template_nearest_summary = markdown_templates["nearest_summary"]
+
+text_completeness_intro = markdown_templates["completeness_intro"]
+
+template_heatmap_intro = markdown_templates["heatmap_intro"]
+placeholder_heatmap_summary = markdown_templates["heatmap_summary"]
+
+template_rainfall_intro = markdown_templates["rainfall_intro"]
+placeholder_rainfall_summary = markdown_templates["rainfall_summary"]
+
+placeholder_closing = markdown_templates["closing"]
+
+# LOAD PROMPT TEMPLATES
+prompt_template_completeness = prompt_templates["completeness"]
+prompt_template_rainfall = prompt_templates["rainfall"]
+
 
 # LAYOUT ELEMENTS (DEFAULT STATE)
 PAGE_TITLE = ":round_pushpin: Eksplorasi Data Hujan :round_pushpin:"
@@ -84,10 +130,12 @@ with layout_header.container():
 
 # ABSTRACT
 with layout_abstract.container():
-    st.markdown(pg_introduction, unsafe_allow_html=True)
-    mainfunc.update_to_session({"pg_intro": pg_introduction})
+    st.markdown(text_abstract, unsafe_allow_html=True)
+    mainfunc.session_state_update({"pg_intro": text_abstract})
 
 # MAIN SECTIONS
+
+st.header("📊 Data Stasiun Pengamatan Hujan")
 
 # MAIN - MAP OF RAINFALL STATIONS
 
@@ -168,13 +216,13 @@ with layout_map_intro.container():
         "total_stations": len(metadata_rainfall),
     }
 
-    pg_map_intro = md_map_intro.format(**DATA_MAPS_INTRO)
+    pg_map_intro = template_map_intro.format(**DATA_MAPS_INTRO)
 
     ## layout
     st.markdown(pg_map_intro)
 
     ## save
-    mainfunc.update_to_session({"pg_map_intro": pg_map_intro})
+    mainfunc.session_state_update({"pg_map_intro": pg_map_intro})
 
 # MAP 2 (FIGURE)
 with layout_map_figure.container():
@@ -191,10 +239,10 @@ with layout_map_figure.container():
         st.dataframe(metadata_rainfall, use_container_width=True)
     with tabs_map[2]:
         with st.container(border=True):
-            st.markdown(pg_map_info, unsafe_allow_html=True)
+            st.markdown(text_map_info, unsafe_allow_html=True)
 
     ## save
-    mainfunc.update_to_session({"pg_map_info": pg_map_info})
+    mainfunc.session_state_update({"pg_map_info": text_map_info})
 
 
 # INPUT COORDINATE
@@ -208,7 +256,7 @@ with layout_map_input.container():
     MY_TOTAL_NEAREST = 10
 
     ## layout
-    st.markdown(pg_map_coordinate, unsafe_allow_html=True)
+    st.markdown(template_map_coordinate, unsafe_allow_html=True)
 
     cols_map = st.columns(3)
 
@@ -284,7 +332,7 @@ if btn_coordinate and is_all_valid:
         coordinate_point, coordinate_name, table_nearest_stations
     )
 
-    mainfunc.update_to_session(
+    mainfunc.session_state_update(
         {
             "table_nearest_stations": table_nearest_stations,
             "fig_nearest_stations": fig_nearest_stations,
@@ -321,8 +369,8 @@ if st.session_state.get("fig_nearest_stations") is not None and is_all_valid:
         "farthest_station_distance": table_nearest_updated.iloc[-1]["DISTANCE"],
     }
 
-    pg_nearest_intro = md_nearest_intro.format(**data_nearest)
-    pg_nearest_sum = md_nearest_sum.format(**data_nearest)
+    pg_nearest_intro = template_nearest_intro.format(**data_nearest)
+    pg_nearest_sum = template_nearest_summary.format(**data_nearest)
 
     ## layout
     with layout_nearest_intro.container():
@@ -345,7 +393,7 @@ if st.session_state.get("fig_nearest_stations") is not None and is_all_valid:
     ## session
     st.session_state.IS_NEAREST_SECTION_DONE = True
 
-    mainfunc.update_to_session(
+    mainfunc.session_state_update(
         {
             "pg_nearest_intro": pg_nearest_intro,
             "pg_nearest_sum": pg_nearest_sum,
@@ -383,11 +431,11 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
     }
 
     prompt_completeness = prompt_template_completeness.format(**data_completeness)
-    pg_heatmap_intro = md_heatmap_intro.format(**data_nearest)
+    pg_heatmap_intro = template_heatmap_intro.format(**data_nearest)
 
     # DISPLAY
     with layout_completeness_intro.container():
-        st.markdown(pg_completeness_intro)
+        st.markdown(text_completeness_intro)
 
     with layout_heatmap_intro.container():
         st.markdown(pg_heatmap_intro)
@@ -421,9 +469,9 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
                 )
 
     ## save
-    mainfunc.update_to_session(
+    mainfunc.session_state_update(
         {
-            "pg_completeness_intro": pg_completeness_intro,
+            "pg_completeness_intro": text_completeness_intro,
             "pg_heatmap_intro": pg_heatmap_intro,
         }
     )
@@ -437,7 +485,7 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
                     openai_api_key=st.session_state.openai_api_key,
                 )
 
-                mainfunc.update_to_session(
+                mainfunc.session_state_update(
                     {
                         "GPT_RESPONSE_COMPLETENESS": response_completeness,
                         "GPT_PROMPT_COMPLETENESS": prompt_completeness,
@@ -451,7 +499,7 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
             st.markdown(st.session_state.GPT_RESPONSE_COMPLETENESS)
     else:
         with layout_completeness_heatmap_summary.container(border=True):
-            st.markdown(pg_template_heatmap_sum, unsafe_allow_html=True)
+            st.markdown(placeholder_heatmap_summary, unsafe_allow_html=True)
 
     # RAINFALL GRAPH
 
@@ -477,7 +525,7 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
     }
 
     prompt_rainfall = prompt_template_rainfall.format(**data_rainfall)
-    pg_rainfall_intro = md_rainfall_intro.format(
+    pg_rainfall_intro = template_rainfall_intro.format(
         **{"list_of_nearest_stations": "\n".join(nearest_ids_names)}
     )
 
@@ -503,7 +551,7 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
             st.dataframe(rainfall_df.describe(), use_container_width=True)
 
     ## save
-    mainfunc.update_to_session({"pg_rainfall_intro": pg_rainfall_intro})
+    mainfunc.session_state_update({"pg_rainfall_intro": pg_rainfall_intro})
 
     if btn_generate_rainfall:
         with layout_rainfall_summary.container():
@@ -514,7 +562,7 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
                     openai_api_key=st.session_state.openai_api_key,
                 )
 
-                mainfunc.update_to_session(
+                mainfunc.session_state_update(
                     {
                         "GPT_RESPONSE_RAINFALL": response_rainfall,
                         "GPT_PROMPT_RAINFALL": prompt_rainfall,
@@ -528,9 +576,9 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
             st.markdown(st.session_state.GPT_RESPONSE_RAINFALL)
     else:
         with layout_rainfall_summary.container(border=True):
-            st.markdown(pg_template_rainfall_sum, unsafe_allow_html=True)
+            st.markdown(placeholder_rainfall_summary, unsafe_allow_html=True)
 
-    layout_closing.markdown(pg_closing)
+    layout_closing.markdown(placeholder_closing)
 
 
 # REFRESH BUTTON
