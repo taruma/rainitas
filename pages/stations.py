@@ -1,11 +1,11 @@
 """Station page"""
 
-import streamlit as st
 import plotly.io as pio
+import streamlit as st
+from streamlit import session_state as state
 
-from src.stations import pyfunc, pyfigure
-from src.stations import pytemplate
 from src import mainfunc, stationsfunc
+from src.stations import pyfigure, pyfunc, pytemplate
 
 # SETUP PAGE
 
@@ -62,7 +62,7 @@ def load_templates():
         "abstract": "docs/stations/abstract.md",
         "map_intro": "docs/stations/map_intro_template.md",
         "map_info": "docs/stations/map_info.md",
-        "map_coordinate": "docs/stations/map_coordinate_template.md",
+        "map_coordinate": "docs/stations/map_coordinate.md",
         "nearest_intro": "docs/stations/nearest_intro_template.md",
         "nearest_summary": "docs/stations/nearest_summary_template.md",
         "completeness_intro": "docs/stations/completeness_intro.md",
@@ -91,8 +91,6 @@ metadata_rainfall, metadata_completeness = load_metadata()
 markdown_templates, prompt_templates = load_templates()
 
 # LOAD MARKDOWN TEMPLATES
-text_abstract = markdown_templates["abstract"]
-
 template_map_intro = markdown_templates["map_intro"]
 text_map_info = markdown_templates["map_info"]
 template_map_coordinate = markdown_templates["map_coordinate"]
@@ -115,91 +113,86 @@ prompt_template_completeness = prompt_templates["completeness"]
 prompt_template_rainfall = prompt_templates["rainfall"]
 
 
-# LAYOUT ELEMENTS (DEFAULT STATE)
-PAGE_TITLE = ":round_pushpin: Eksplorasi Data Hujan :round_pushpin:"
-PAGE_SUBHEADER = "Mengakses dan Mengakuisisi Data Hujan"
+# MAIN LAYOUT:
 
-# HEADER & ABSTRACT
-layout_header = st.empty()
-layout_abstract = st.empty()
+PAGE_TITLES = {
+    "title": ":round_pushpin: Eksplorasi Data Hujan :round_pushpin:",
+    "subtitle": "Mengakses dan Mengakuisisi Data Hujan",
+    "title_map": "🗺️ Peta Stasiun Pengamatan Hujan",
+    "title_map_coordinate": "📌 Titik Koordinat Tinjauan",
+    "title_nearest": "🔍 Peta Stasiun Terdekat",
+    "title_completeness": "📊 Data Kelengkapan Pengamatan",
+    "title_heatmap": "🎲 Grafik Kelengkapan Data",
+    "title_rainfall": "👓 Grafik Hujan Harian",
+    "title_closing": "🚪 Penutup",
+}
 
-# HEADER
-with layout_header.container():
-    st.title(PAGE_TITLE)
-    st.subheader(PAGE_SUBHEADER)
+# SIDEBAR SECTION ------------------------------------------
+with st.sidebar:
+    st.text_input("OpenAI API Key", type="password", key="openai_api_key")
+    st.selectbox(
+        "Select Model", ["gpt-4o", "gpt-3.5-turbo", "gpt-4-turbo"], key="gpt_model"
+    )
 
-# ABSTRACT
-with layout_abstract.container():
-    st.markdown(text_abstract, unsafe_allow_html=True)
-    mainfunc.session_state_update({"pg_intro": text_abstract})
+# HEADER SECTION -------------------------------------------
+# HEADER - TITLE SECTION -----------------------------------
+st.title(PAGE_TITLES["title"], anchor="rainitas-stations")
+st.subheader(PAGE_TITLES["subtitle"], anchor=False)
 
-# MAIN SECTIONS
+# HEADER - ABSTRACT SECTION --------------------------------
+text_abstract = markdown_templates["abstract"]
+st.markdown(text_abstract, unsafe_allow_html=True)
 
-st.header("📊 Data Stasiun Pengamatan Hujan")
+# MAIN SECTION ---------------------------------------------
+# MAIN - MAP SECTION ---------------------------------------
+st.header(PAGE_TITLES["title_map"], anchor="map", divider="blue")
+layout_map_intro = st.empty()
+layout_map_figure = st.empty()
 
-# MAIN - MAP OF RAINFALL STATIONS
+# MAIN - MAP COORDINATE SECTION ----------------------------
+st.header(PAGE_TITLES["title_map_coordinate"], anchor="map-coordinate", divider="red")
+st.markdown(markdown_templates["map_coordinate"])
+layout_map_input = st.empty()
+layout_map_validate = st.empty()
 
-TITLE_MAP_SECTION = "## 🗺️ Peta Stasiun Pengamatan Hujan"
-TITLE_MAP_COORDINATE = "#### 📌 Titik Koordinat Tinjauan"
-TITLE_NEAREST_SECTION = "#### 🔍 Peta Stasiun Terdekat"
-TITLE_COMPLETENESS = "### 📊 Data Kelengkapan Pengamatan"
-TITLE_HEATMAP = "##### 🎲 Heatmap & Grafik Bar Kelengkapan Data"
+# MAIN - NEAREST SECTION -----------------------------------
+st.header(PAGE_TITLES["title_nearest"], anchor="nearest", divider="blue")
+layout_nearest_intro = st.empty()
+layout_nearest_map = st.empty()
+layout_nearest_map.warning("Click 'Find Nearest Stations' to see the result.")
+layout_nearest_summary = st.empty()
 
-layout_map_section = st.empty()
-with layout_map_section.container():
-    st.markdown(TITLE_MAP_SECTION)
-    layout_map_intro = st.empty()
-    layout_map_figure = st.empty()
+# MAIN - COMPLETENESS SECTION ------------------------------
+st.header(PAGE_TITLES["title_completeness"], anchor="completeness", divider="blue")
+layout_completeness_intro = st.empty()
+layout_completeness_intro.warning("Complete Nearest Stations to continue.")
 
-    st.markdown(TITLE_MAP_COORDINATE)
-    layout_map_input = st.empty()
-    layout_map_validate = st.empty()
+# MAIN - HEATMAP SECTION -----------------------------------
+st.header(PAGE_TITLES["title_heatmap"], anchor="heatmap", divider="blue")
+layout_heatmap_intro = st.empty()
+layout_heatmap_figure = st.empty()
+layout_heatmap_figure.warning("Complete Nearest Stations to continue.")
+with st.expander("Generate Analysis Using 🤖 GPT"):
+    btn_generate_completeness = st.button(
+        "Generate analysis of completeness",
+        use_container_width=True,
+        disabled=False,
+    )
+layout_heatmap_summary = st.empty()
 
-layout_nearest_section = st.empty()
-with layout_nearest_section.container():
-    st.markdown(TITLE_NEAREST_SECTION)
-    layout_nearest_intro = st.empty()
-    layout_nearest_map = st.empty()
-    layout_nearest_map.warning("Click 'Find Nearest Stations' to see the result.")
-    layout_nearest_summary = st.empty()
-
-layout_completeness_section = st.empty()
-with layout_completeness_section.container():
-    st.markdown(TITLE_COMPLETENESS)
-    layout_completeness_intro = st.empty()
-    layout_completeness_intro.warning("Complete Nearest Stations to continue.")
-
-layout_heatmap_section = st.empty()
-with layout_heatmap_section.container():
-    st.markdown(TITLE_HEATMAP)
-    layout_heatmap_intro = st.empty()
-    layout_completeness_heatmap_figure = st.empty()
-    layout_completeness_heatmap_figure.warning("Complete Nearest Stations to continue.")
-    layout_completeness_button = st.empty()
-    with layout_completeness_button.expander("Generate Analysis Using 🤖 GPT"):
-        st.text_input("OpenAI API Key", type="password", key="openai_api_key")
-        st.selectbox(
-            "Select Model", ["gpt-4o", "gpt-3.5-turbo", "gpt-4-turbo"], key="gpt_model"
-        )
-        btn_generate_completeness = st.button(
-            "Generate analysis of completeness",
-            use_container_width=True,
-            disabled=False,
-        )
-    layout_completeness_heatmap_summary = st.empty()
-
-st.markdown("##### 👓 Grafik Hujan Harian")
+# MAIN - RAINFALL SECTION ----------------------------------
+st.header(PAGE_TITLES["title_rainfall"], anchor="rainfall", divider="blue")
 layout_rainfall_intro = st.empty()
 layout_rainfall_figure = st.empty()
 layout_rainfall_figure.warning("Complete Nearest Stations to continue.")
-layout_rainfall_button = st.empty()
-with layout_rainfall_button.expander("Generate Analysis Using 🤖 GPT"):
+with st.expander("Generate Analysis Using 🤖 GPT"):
     btn_generate_rainfall = st.button(
         "Generate analysis of rainfall", use_container_width=True, disabled=False
     )
 layout_rainfall_summary = st.empty()
 
-st.markdown("## 🚪 Penutup")
+# MAIN - CLOSING SECTION -----------------------------------
+st.header(PAGE_TITLES["title_closing"], anchor="closing", divider="blue")
 layout_closing = st.empty()
 layout_closing.warning("Complete all sections to finish.")
 
@@ -248,42 +241,34 @@ with layout_map_figure.container():
 # INPUT COORDINATE
 with layout_map_input.container():
     ## data
-    ## DEFAULT DATA
-    MY_COORDINATE = "Queensdale"
-    MY_LATITUDE = "-6.2631"
-    MY_LONGITUDE = "106.8095"
-    MY_RADIUS = 25
-    MY_TOTAL_NEAREST = 10
 
     ## layout
-    st.markdown(template_map_coordinate, unsafe_allow_html=True)
-
     cols_map = st.columns(3)
 
     with cols_map[0]:
         coordinate_name = st.text_input(
             "Coordinate Name",
-            MY_COORDINATE,
+            st.session_state.coordinate_name,
             key="coordinate_name",
         )
 
     with cols_map[1]:
         latitude = st.text_input(
-            "Latitude / Lintang Derajat", MY_LATITUDE, key="latitude"
+            "Latitude / Lintang Derajat", state.latitude, key="latitude"
         )
         longitude = st.text_input(
-            "Longitude / Bujur Derajat", MY_LONGITUDE, key="longitude"
+            "Longitude / Bujur Derajat", state.longitude, key="longitude"
         )
 
     with cols_map[2]:
         radius_km = st.number_input(
-            "Radius (km)", min_value=1, step=1, value=MY_RADIUS, key="radius_km"
+            "Radius (km)", min_value=1, step=1, value=state.radius_km, key="radius_km"
         )
         nearest_stations_limit = st.number_input(
             "Maximum Number of Nearest Stations",
             min_value=1,
             step=1,
-            value=MY_TOTAL_NEAREST,
+            value=state.nearest_station_limit,
             key="nearest_station_limit",
         )
         btn_coordinate = st.button(
@@ -440,7 +425,7 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
     with layout_heatmap_intro.container():
         st.markdown(pg_heatmap_intro)
 
-    with layout_completeness_heatmap_figure.container():
+    with layout_heatmap_figure.container():
         TABTITLE_COMPLETENESS = [
             "Heatmap Kelengkapan",
             "Tabel Kelengkapan Data",
@@ -477,7 +462,7 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
     )
 
     if btn_generate_completeness:
-        with layout_completeness_heatmap_summary.container():
+        with layout_heatmap_summary.container():
             with st.spinner("Generating Analysis..."):
                 response_completeness = mainfunc.generate_gpt(
                     prompt=prompt_completeness,
@@ -493,12 +478,12 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
                 )
 
     if st.session_state.get("GPT_RESPONSE_COMPLETENESS") is not None:
-        with layout_completeness_heatmap_summary.container():
+        with layout_heatmap_summary.container():
             with st.expander("View Prompt"):
                 st.code(st.session_state.GPT_PROMPT_COMPLETENESS)
             st.markdown(st.session_state.GPT_RESPONSE_COMPLETENESS)
     else:
-        with layout_completeness_heatmap_summary.container(border=True):
+        with layout_heatmap_summary.container(border=True):
             st.markdown(placeholder_heatmap_summary, unsafe_allow_html=True)
 
     # RAINFALL GRAPH
