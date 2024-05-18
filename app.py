@@ -3,6 +3,8 @@
 import streamlit as st
 from src import mainfunc
 
+# VERSION
+APP_VERSION = "v1.0.4"
 
 # SETUP PAGE CONFIG
 st.set_page_config(
