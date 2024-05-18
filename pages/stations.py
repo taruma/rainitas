@@ -32,14 +32,22 @@ metadata_completeness = pyfunc.read_metadata_csv("data/completeness")
 pg_introduction = mainfunc.load_markdown("docs/stations/01_intro.md")
 md_map_intro = mainfunc.load_markdown("docs/stations/02_template_map_intro.md")
 pg_map_info = mainfunc.load_markdown("docs/stations/03_map_info.md")
-pg_map_coordinate = mainfunc.load_markdown("docs/stations/04_template_map_coordinate.md")
+pg_map_coordinate = mainfunc.load_markdown(
+    "docs/stations/04_template_map_coordinate.md"
+)
 md_nearest_intro = mainfunc.load_markdown("docs/stations/05_template_nearest_intro.md")
 md_nearest_sum = mainfunc.load_markdown("docs/stations/06_template_nearest_summary.md")
 pg_completeness_intro = mainfunc.load_markdown("docs/stations/07_completeness_intro.md")
 md_heatmap_intro = mainfunc.load_markdown("docs/stations/08_template_heatmap_intro.md")
-pg_template_heatmap_sum = mainfunc.load_markdown("docs/stations/09_placeholder_heatmap_summary.md")
-md_rainfall_intro = mainfunc.load_markdown("docs/stations/10_template_rainfall_intro.md")
-pg_template_rainfall_sum = mainfunc.load_markdown("docs/stations/11_placeholder_rainfall_summary.md")
+pg_template_heatmap_sum = mainfunc.load_markdown(
+    "docs/stations/09_placeholder_heatmap_summary.md"
+)
+md_rainfall_intro = mainfunc.load_markdown(
+    "docs/stations/10_template_rainfall_intro.md"
+)
+pg_template_rainfall_sum = mainfunc.load_markdown(
+    "docs/stations/11_placeholder_rainfall_summary.md"
+)
 pg_closing = mainfunc.load_markdown("docs/stations/12_placeholder_closing.md")
 
 
@@ -149,7 +157,6 @@ layout_closing.warning("Complete all sections to finish.")
 
 
 # ----------- START OF PAGE
-
 
 
 # MAP 1 (INTRO)
