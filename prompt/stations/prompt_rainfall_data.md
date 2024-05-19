@@ -2,11 +2,11 @@ Setelah kamu memeriksa kelengkapan data hujan, Kamu melanjutkan ke tahap mengeks
 
 Berikut tabel stasiun hujan terdekat:
 
-{table_nearest_stations_csv}
+{table_nearest_stations}
 
 Berikut tabel statisitik data hujan di setiap stasiun yang diperoleh menggunakan fungsi .describe(), dengan kolom menunjukkan setiap stasiun (menggunakan kode stasiun):
 
-{table_describe_rainfall_csv}
+{table_describe_rainfall}
 
 Buat setidaknya 3 paragraf yang berisikan informasi apa saja yang dapat diperoleh dari tabel tersebut.
 
