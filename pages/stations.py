@@ -26,7 +26,6 @@ st.set_page_config(
 
 mainfunc.session_state_create(
     {
-        "IS_INPUT_VALID": False,
         "IS_NEAREST_SECTION_DONE": False,
         "GPT_RESPONSE_COMPLETENESS": None,
         "GPT_RESPONSE_RAINFALL": None,
@@ -34,7 +33,8 @@ mainfunc.session_state_create(
         "latitude": "-6.2631",
         "longitude": "106.8095",
         "radius_km": 25,
-        "nearest_station_limit": 10,
+        "nearest_stations_limit": 10,
+        "gpt_model": "gpt-4o",
     }
 )
 
@@ -43,78 +43,7 @@ mainfunc.load_css("assets/stations.css")
 mainfunc.main_sidebar()
 
 
-# INITIALIZE / LOAD DATA
-@st.cache_data
-def load_metadata():
-    """Load metadata from CSV files."""
-
-    rainfall = pyfunc.read_metadata_csv("data/rainfall")
-    completeness = pyfunc.read_metadata_csv("data/completeness")
-
-    return rainfall, completeness
-
-
-@st.cache_data
-def load_templates():
-    """Load markdown files."""
-
-    markdown_file_path = {
-        "abstract": "docs/stations/abstract.md",
-        "map_intro": "docs/stations/map_intro_template.md",
-        "map_info": "docs/stations/map_info.md",
-        "map_coordinate": "docs/stations/map_coordinate.md",
-        "nearest_intro": "docs/stations/nearest_intro_template.md",
-        "nearest_summary": "docs/stations/nearest_summary_template.md",
-        "completeness_intro": "docs/stations/completeness_intro.md",
-        "heatmap_intro": "docs/stations/heatmap_intro_template.md",
-        "heatmap_summary": "docs/stations/heatmap_summary_placeholder.md",
-        "rainfall_intro": "docs/stations/rainfall_intro_template.md",
-        "rainfall_summary": "docs/stations/rainfall_summary_placeholder.md",
-        "closing": "docs/stations/closing_placeholder.md",
-    }
-
-    loaded_markdown_files = {
-        key: mainfunc.load_markdown(value) for key, value in markdown_file_path.items()
-    }
-
-    loaded_prompt_files = {
-        "completeness": mainfunc.load_markdown(
-            "prompt/stations/prompt_completeness.md"
-        ),
-        "rainfall": mainfunc.load_markdown("prompt/stations/prompt_rainfall_data.md"),
-    }
-
-    return loaded_markdown_files, loaded_prompt_files
-
-
-metadata_rainfall, metadata_completeness = load_metadata()
-markdown_templates, prompt_templates = load_templates()
-
-# LOAD MARKDOWN TEMPLATES
-template_map_intro = markdown_templates["map_intro"]
-text_map_info = markdown_templates["map_info"]
-template_map_coordinate = markdown_templates["map_coordinate"]
-
-template_nearest_intro = markdown_templates["nearest_intro"]
-template_nearest_summary = markdown_templates["nearest_summary"]
-
-text_completeness_intro = markdown_templates["completeness_intro"]
-
-template_heatmap_intro = markdown_templates["heatmap_intro"]
-placeholder_heatmap_summary = markdown_templates["heatmap_summary"]
-
-template_rainfall_intro = markdown_templates["rainfall_intro"]
-placeholder_rainfall_summary = markdown_templates["rainfall_summary"]
-
-placeholder_closing = markdown_templates["closing"]
-
-# LOAD PROMPT TEMPLATES
-prompt_template_completeness = prompt_templates["completeness"]
-prompt_template_rainfall = prompt_templates["rainfall"]
-
-
-# MAIN LAYOUT:
-
+# START OF LAYOUT SECTION #################################
 PAGE_TITLES = {
     "title": ":round_pushpin: Eksplorasi Data Hujan :round_pushpin:",
     "subtitle": "Mengakses dan Mengakuisisi Data Hujan",
@@ -129,9 +58,10 @@ PAGE_TITLES = {
 
 # SIDEBAR SECTION ------------------------------------------
 with st.sidebar:
+    st.header("Station Configuration", anchor=False, divider="grey")
     st.text_input("OpenAI API Key", type="password", key="openai_api_key")
     st.selectbox(
-        "Select Model", ["gpt-4o", "gpt-3.5-turbo", "gpt-4-turbo"], key="gpt_model"
+        "Select Model", ["gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"], key="gpt_model"
     )
 
 # HEADER SECTION -------------------------------------------
@@ -140,8 +70,7 @@ st.title(PAGE_TITLES["title"], anchor="rainitas-stations")
 st.subheader(PAGE_TITLES["subtitle"], anchor=False)
 
 # HEADER - ABSTRACT SECTION --------------------------------
-text_abstract = markdown_templates["abstract"]
-st.markdown(text_abstract, unsafe_allow_html=True)
+layout_abstract = st.empty()
 
 # MAIN SECTION ---------------------------------------------
 # MAIN - MAP SECTION ---------------------------------------
@@ -151,8 +80,9 @@ layout_map_figure = st.empty()
 
 # MAIN - MAP COORDINATE SECTION ----------------------------
 st.header(PAGE_TITLES["title_map_coordinate"], anchor="map-coordinate", divider="red")
-st.markdown(markdown_templates["map_coordinate"])
+layout_map_coordinate_intro = st.empty()
 layout_map_input = st.empty()
+layout_map_update = st.empty()
 layout_map_validate = st.empty()
 
 # MAIN - NEAREST SECTION -----------------------------------
@@ -172,12 +102,7 @@ st.header(PAGE_TITLES["title_heatmap"], anchor="heatmap", divider="blue")
 layout_heatmap_intro = st.empty()
 layout_heatmap_figure = st.empty()
 layout_heatmap_figure.warning("Complete Nearest Stations to continue.")
-with st.expander("Generate Analysis Using 🤖 GPT"):
-    btn_generate_completeness = st.button(
-        "Generate analysis of completeness",
-        use_container_width=True,
-        disabled=False,
-    )
+layout_heatmap_gpt = st.empty()
 layout_heatmap_summary = st.empty()
 
 # MAIN - RAINFALL SECTION ----------------------------------
@@ -185,10 +110,7 @@ st.header(PAGE_TITLES["title_rainfall"], anchor="rainfall", divider="blue")
 layout_rainfall_intro = st.empty()
 layout_rainfall_figure = st.empty()
 layout_rainfall_figure.warning("Complete Nearest Stations to continue.")
-with st.expander("Generate Analysis Using 🤖 GPT"):
-    btn_generate_rainfall = st.button(
-        "Generate analysis of rainfall", use_container_width=True, disabled=False
-    )
+layout_rainfall_gpt = st.empty()
 layout_rainfall_summary = st.empty()
 
 # MAIN - CLOSING SECTION -----------------------------------
@@ -196,154 +118,156 @@ st.header(PAGE_TITLES["title_closing"], anchor="closing", divider="blue")
 layout_closing = st.empty()
 layout_closing.warning("Complete all sections to finish.")
 
+# FOOTER SECTION -------------------------------------------
+layout_footer = st.empty()
 
-# ----------- START OF PAGE
+# END OF LAYOUT SECTION ------------------------------------
 
 
-# MAP 1 (INTRO)
+# LOAD DATA & TEXT
+metadata_rainfall, metadata_completeness = stationsfunc.load_metadata()
+markdown_templates, prompt_templates = stationsfunc.load_templates()
+
+# LAYOUT DETAILS
+# DETAIL - HEADER SECTION -----------------------------------
+# DETAIL - HEADER - ABSTRACT
+text_abstract = markdown_templates["abstract"]
+with layout_abstract.container():
+    st.markdown(text_abstract, unsafe_allow_html=True)
+
+# DETAIL - MAIN SECTION -------------------------------------
+# DETAIL - MAIN - MAP
+DATASET_INFO = {
+    "dataset_name": "Kaggle - greegtitan/indonesia-climate",
+    "dataset_link": "https://www.kaggle.com/datasets/greegtitan/indonesia-climate",
+}
+DATASET_STATS = {
+    "total_stations": len(metadata_rainfall),
+}
+TABTITLE_MAP = ["Peta Stasiun", "Tabel Metadata Stasiun", "Informasi Dataset"]
+
+text_map_intro = markdown_templates["map_intro"].format(**DATASET_INFO, **DATASET_STATS)
+text_map_info = markdown_templates["map_info"]
+fig_map = pyfigure.generate_station_map_figure(metadata_rainfall)
+
 with layout_map_intro.container():
-    ## data
-    DATA_MAPS_INTRO = {
-        "dataset_name": "Kaggle - greegtitan/indonesia-climate",
-        "dataset_link": "https://www.kaggle.com/datasets/greegtitan/indonesia-climate",
-        "total_stations": len(metadata_rainfall),
-    }
-
-    pg_map_intro = template_map_intro.format(**DATA_MAPS_INTRO)
-
-    ## layout
-    st.markdown(pg_map_intro)
-
-    ## save
-    mainfunc.session_state_update({"pg_map_intro": pg_map_intro})
-
-# MAP 2 (FIGURE)
+    st.markdown(text_map_intro)
 with layout_map_figure.container():
-    ## data
-    TABTITLE_MAP = ["Peta Stasiun", "Tabel Metadata Stasiun", "Informasi Dataset"]
-
-    fig_map = pyfigure.generate_station_map_figure(metadata_rainfall)
-
-    ## layout
     tabs_map = st.tabs(TABTITLE_MAP)
     with tabs_map[0]:
         st.plotly_chart(fig_map, use_container_width=True)
     with tabs_map[1]:
         st.dataframe(metadata_rainfall, use_container_width=True)
     with tabs_map[2]:
-        with st.container(border=True):
-            st.markdown(text_map_info, unsafe_allow_html=True)
+        st.markdown(text_map_info, unsafe_allow_html=True)
 
-    ## save
-    mainfunc.session_state_update({"pg_map_info": text_map_info})
+# DETAIL - MAIN - MAP COORDINATE // INPUT
+with layout_map_coordinate_intro:
+    st.markdown(markdown_templates["map_coordinate"])
 
+LABELS_COORDINATE = {
+    "coordinate_name": "Coordinate Name",
+    "latitude": "Latitude / Lintang Derajat",
+    "longitude": "Longitude / Bujur Derajat",
+    "radius_km": "Radius (km)",
+    "nearest_stations_limit": "Maximum Number of Nearest Stations",
+    "btn_find_nearest": ":round_pushpin: Find Nearest Stations",
+}
 
-# INPUT COORDINATE
 with layout_map_input.container():
-    ## data
-
-    ## layout
     cols_map = st.columns(3)
-
     with cols_map[0]:
-        coordinate_name = st.text_input(
-            "Coordinate Name",
-            st.session_state.coordinate_name,
+        st.text_input(
+            LABELS_COORDINATE["coordinate_name"],
+            state.coordinate_name,
             key="coordinate_name",
         )
-
     with cols_map[1]:
-        latitude = st.text_input(
-            "Latitude / Lintang Derajat", state.latitude, key="latitude"
-        )
-        longitude = st.text_input(
-            "Longitude / Bujur Derajat", state.longitude, key="longitude"
-        )
-
+        st.text_input(LABELS_COORDINATE["latitude"], state.latitude, key="latitude")
+        st.text_input(LABELS_COORDINATE["longitude"], state.longitude, key="longitude")
     with cols_map[2]:
-        radius_km = st.number_input(
-            "Radius (km)", min_value=1, step=1, value=state.radius_km, key="radius_km"
-        )
-        nearest_stations_limit = st.number_input(
-            "Maximum Number of Nearest Stations",
+        st.number_input(
+            LABELS_COORDINATE["radius_km"],
             min_value=1,
             step=1,
-            value=state.nearest_station_limit,
-            key="nearest_station_limit",
+            value=state.radius_km,
+            key="radius_km",
         )
-        btn_coordinate = st.button(
-            ":round_pushpin: Find Nearest Stations",
+        st.number_input(
+            LABELS_COORDINATE["nearest_stations_limit"],
+            min_value=1,
+            value=state.nearest_stations_limit,
+            key="nearest_stations_limit",
+        )
+        btn_find_nearest = st.button(
+            LABELS_COORDINATE["btn_find_nearest"],
             use_container_width=True,
             type="primary",
         )
 
-# INPUT VALIDATION
-
-IS_NAME_VALID = (coordinate_name is not None) and (coordinate_name != "")
-IS_LAT_VALID = pyfunc.validate_single_coordinate(latitude, "lat")
-IS_LON_VALID = pyfunc.validate_single_coordinate(longitude, "lon")
-
-is_all_valid = IS_LAT_VALID and IS_LON_VALID and IS_NAME_VALID
-
-## reset status if not valid
-if not is_all_valid:
-    EMOJI_CHECK = [":x:", ":heavy_check_mark:"]
-
-    # error message
-    layout_map_validate.error(
-        f"""
-        Please input the coordinate information correctly.\n
-        - Coordinate Name: {EMOJI_CHECK[IS_NAME_VALID]} \n
-        - Latitude: {EMOJI_CHECK[IS_LAT_VALID]} \n
-        - Longitude: {EMOJI_CHECK[IS_LON_VALID]} \n
-        """
+# BUTTONS SECTION ------------------------------------------
+with layout_heatmap_gpt.expander("Generate Analysis Using 🤖 GPT"):
+    btn_generate_completeness = st.button(
+        "Generate analysis of completeness", use_container_width=True
+    )
+with layout_rainfall_gpt.expander("Generate Analysis Using 🤖 GPT"):
+    btn_generate_rainfall = st.button(
+        "Generate analysis of rainfall", use_container_width=True
     )
 
-    # reset state
-    st.session_state.fig_nearest_stations = None
-    st.session_state.IS_NEAREST_SECTION_DONE = False
+with layout_footer:
+    st.divider()
+    btn_refresh = st.button("Refresh", use_container_width=True)
 
-# FIND NEAREST STATIONS - DATA / ACTION
-# GET TABLE AND FIGURE IF BUTTON IS CLICKED AND ALL VALID
 
-if btn_coordinate and is_all_valid:
-    coordinate_point = f"{latitude},{longitude}"
+IS_COORDINATE_VALID = stationsfunc.validate_input(
+    state.coordinate_name, state.latitude, state.longitude, layout_map_validate
+)
 
+if btn_find_nearest and IS_COORDINATE_VALID:
+    # SAVE VALID COORDINATE INFO
+    mainfunc.session_state_update(
+        {
+            "valid_coordinate_name": state.coordinate_name,
+            "valid_latitude": state.latitude,
+            "valid_longitude": state.longitude,
+            "valid_radius_km": state.radius_km,
+            "valid_nearest_stations_limit": state.nearest_stations_limit,
+        }
+    )
+
+    valid_coordinate_info = {
+        "coordinate_name": state.valid_coordinate_name,
+        "latitude": state.valid_latitude,
+        "longitude": state.valid_longitude,
+        "radius_km": state.valid_radius_km,
+        "nearest_stations_limit": state.valid_nearest_stations_limit,
+    }
+
+    # CALCULATE NEAREST STATIONS
+    coordinate_point = f"{state.latitude},{state.longitude}"
     table_nearest_stations = stationsfunc.get_nearest_stations(
-        coordinate_point, metadata_rainfall, radius_km, nearest_stations_limit
+        coordinate_point,
+        metadata_rainfall,
+        state.radius_km,
+        state.nearest_stations_limit,
     )
-
     fig_nearest_stations = pyfigure.generate_nearest_stations_map(
-        coordinate_point, coordinate_name, table_nearest_stations
+        coordinate_point, state.coordinate_name, table_nearest_stations
     )
 
     mainfunc.session_state_update(
         {
             "table_nearest_stations": table_nearest_stations,
             "fig_nearest_stations": fig_nearest_stations,
-            "prev_coordinate_name": coordinate_name,
-            "prev_latitude": latitude,
-            "prev_longitude": longitude,
-            "prev_radius_km": radius_km,
-            "prev_nearest_stations_limit": nearest_stations_limit,
         }
     )
 
-# FIND NEAREST STATIONS - DISPLAY
-# DISPLAY ONLY FIGURE IS SAVED IN SESSION STATE AND ALL VALID
-
-if st.session_state.get("fig_nearest_stations") is not None and is_all_valid:
-    ## data
     table_nearest_updated = stationsfunc.rename_table_nearest(
-        st.session_state.table_nearest_stations
+        state.table_nearest_stations
     )
 
-    data_nearest = {
-        "coordinate_name": st.session_state.prev_coordinate_name,
-        "latitude": st.session_state.prev_latitude,
-        "longitude": st.session_state.prev_longitude,
-        "radius_km": st.session_state.prev_radius_km,
-        "nearest_stations_limit": st.session_state.prev_nearest_stations_limit,
+    nearest_stats = {
         "total_nearest_stations": len(table_nearest_updated),
         "nearest_stations_name": ", ".join(
             table_nearest_updated["STATION NAME"].tolist()
@@ -354,49 +278,32 @@ if st.session_state.get("fig_nearest_stations") is not None and is_all_valid:
         "farthest_station_distance": table_nearest_updated.iloc[-1]["DISTANCE"],
     }
 
-    pg_nearest_intro = template_nearest_intro.format(**data_nearest)
-    pg_nearest_sum = template_nearest_summary.format(**data_nearest)
-
-    ## layout
-    with layout_nearest_intro.container():
-        st.markdown(pg_nearest_intro)
-
-    with layout_nearest_map.container():
-        TABTITLE_NEAREST = ["Peta Stasiun Terdekat", "Tabel Stasiun Terdekat"]
-        tabs_nearest_map = st.tabs(TABTITLE_NEAREST)
-
-        with tabs_nearest_map[0]:
-            st.plotly_chart(
-                st.session_state.fig_nearest_stations, use_container_width=True
-            )
-        with tabs_nearest_map[1]:
-            st.dataframe(table_nearest_updated, use_container_width=True)
-
-    with layout_nearest_summary.container():
-        st.markdown(pg_nearest_sum)
-
-    ## session
-    st.session_state.IS_NEAREST_SECTION_DONE = True
+    text_nearest_intro = markdown_templates["nearest_intro"].format(
+        **valid_coordinate_info, **nearest_stats
+    )
+    text_nearest_summary = markdown_templates["nearest_summary"].format(
+        **valid_coordinate_info, **nearest_stats
+    )
 
     mainfunc.session_state_update(
         {
-            "pg_nearest_intro": pg_nearest_intro,
-            "pg_nearest_sum": pg_nearest_sum,
+            "table_nearest_updated": table_nearest_updated,
+            "valid_coordinate_info": valid_coordinate_info,
+            "nearest_stats": nearest_stats,
+            "text_nearest_intro": text_nearest_intro,
+            "text_nearest_summary": text_nearest_summary,
         }
     )
 
+    # COMPLETENESS HEATMAP/BAR
 
-# Completeness Data
-
-if st.session_state.IS_NEAREST_SECTION_DONE:
-    ## data
     nearest_station_ids = table_nearest_updated.index.tolist()
 
     completeness_df = pyfunc.get_dataframe_from_folder(
         nearest_station_ids, metadata_completeness, "data/completeness"
     )
 
-    fig_completeness = pyfigure.generate_completeness_heatmap(
+    fig_heatmap = pyfigure.generate_completeness_heatmap(
         completeness_df, metadata_completeness
     )
 
@@ -411,80 +318,26 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
         names_bar_completeness.append(_name)
 
     data_completeness = {
-        "table_nearest_stations_csv": table_nearest_updated.to_markdown(),
-        "table_completeness_data_csv": completeness_df.to_markdown(),
+        "table_nearest_stations": table_nearest_updated.to_markdown(),
+        "table_completeness_data": completeness_df.to_markdown(),
     }
 
-    prompt_completeness = prompt_template_completeness.format(**data_completeness)
-    pg_heatmap_intro = template_heatmap_intro.format(**data_nearest)
-
-    # DISPLAY
-    with layout_completeness_intro.container():
-        st.markdown(text_completeness_intro)
-
-    with layout_heatmap_intro.container():
-        st.markdown(pg_heatmap_intro)
-
-    with layout_heatmap_figure.container():
-        TABTITLE_COMPLETENESS = [
-            "Heatmap Kelengkapan",
-            "Tabel Kelengkapan Data",
-            "Grafik Bar Kelengkapan Data",
-        ]
-
-        tabs_completeness = st.tabs(TABTITLE_COMPLETENESS)
-
-        with tabs_completeness[0]:
-            st.plotly_chart(
-                fig_completeness,
-                use_container_width=True,
-                config={"displayModeBar": False},
-            )
-        with tabs_completeness[1]:
-            st.dataframe(completeness_df, use_container_width=True)
-        with tabs_completeness[2]:
-            for station_id, station_name, fig_bar in zip(
-                nearest_station_ids, names_bar_completeness, figs_bar_completeness
-            ):
-                st.markdown(f"###### 🌧️ {station_id} - {station_name} 🌧️")
-                st.plotly_chart(
-                    fig_bar,
-                    use_container_width=True,
-                    config={"displayModeBar": False},
-                )
-
-    ## save
-    mainfunc.session_state_update(
-        {
-            "pg_completeness_intro": text_completeness_intro,
-            "pg_heatmap_intro": pg_heatmap_intro,
-        }
+    prompt_completeness = prompt_templates["completeness"].format(**data_completeness)
+    text_heatmap_intro = markdown_templates["heatmap_intro"].format(
+        **valid_coordinate_info, **nearest_stats
     )
 
-    if btn_generate_completeness:
-        with layout_heatmap_summary.container():
-            with st.spinner("Generating Analysis..."):
-                response_completeness = mainfunc.generate_gpt(
-                    prompt=prompt_completeness,
-                    model=st.session_state.gpt_model,
-                    openai_api_key=st.session_state.openai_api_key,
-                )
-
-                mainfunc.session_state_update(
-                    {
-                        "GPT_RESPONSE_COMPLETENESS": response_completeness,
-                        "GPT_PROMPT_COMPLETENESS": prompt_completeness,
-                    }
-                )
-
-    if st.session_state.get("GPT_RESPONSE_COMPLETENESS") is not None:
-        with layout_heatmap_summary.container():
-            with st.expander("View Prompt"):
-                st.code(st.session_state.GPT_PROMPT_COMPLETENESS)
-            st.markdown(st.session_state.GPT_RESPONSE_COMPLETENESS)
-    else:
-        with layout_heatmap_summary.container(border=True):
-            st.markdown(placeholder_heatmap_summary, unsafe_allow_html=True)
+    mainfunc.session_state_update(
+        {
+            "completeness_df": completeness_df,
+            "fig_heatmap": fig_heatmap,
+            "figs_bar_completeness": figs_bar_completeness,
+            "names_bar_completeness": names_bar_completeness,
+            "nearest_station_ids": nearest_station_ids,
+            "prompt_completeness": prompt_completeness,
+            "text_heatmap_intro": text_heatmap_intro,
+        }
+    )
 
     # RAINFALL GRAPH
 
@@ -505,17 +358,81 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
     fig_rainfall = pyfigure.generated_rainfall_figure(rainfall_df, metadata_rainfall)
 
     data_rainfall = {
-        "table_nearest_stations_csv": table_nearest_updated.to_markdown(),
-        "table_describe_rainfall_csv": rainfall_df.describe().to_markdown(),
+        "table_nearest_stations": table_nearest_updated.to_markdown(),
+        "table_describe_rainfall": rainfall_df.describe().to_markdown(),
     }
 
-    prompt_rainfall = prompt_template_rainfall.format(**data_rainfall)
-    pg_rainfall_intro = template_rainfall_intro.format(
+    prompt_rainfall = prompt_templates["rainfall"].format(**data_rainfall)
+    text_rainfall_intro = markdown_templates["rainfall_intro"].format(
         **{"list_of_nearest_stations": "\n".join(nearest_ids_names)}
     )
 
+    mainfunc.session_state_update(
+        {
+            "fig_rainfall": fig_rainfall,
+            "rainfall_df": rainfall_df,
+            "prompt_rainfall": prompt_rainfall,
+            "text_rainfall_intro": text_rainfall_intro,
+        }
+    )
+
+    state.IS_NEAREST_SECTION_DONE = True
+
+# DISPLAY RESULT (LAYOUT) ###################################
+
+if state.IS_NEAREST_SECTION_DONE:
+    with layout_nearest_intro.container():
+        st.markdown(state.text_nearest_intro)
+
+    TABTITLE_NEAREST = ["Peta Stasiun Terdekat", "Tabel Stasiun Terdekat"]
+    with layout_nearest_map.container():
+        tabs_nearest_map = st.tabs(TABTITLE_NEAREST)
+        with tabs_nearest_map[0]:
+            st.plotly_chart(state.fig_nearest_stations, use_container_width=True)
+        with tabs_nearest_map[1]:
+            st.dataframe(state.table_nearest_updated, use_container_width=True)
+
+    with layout_nearest_summary.container():
+        st.markdown(state.text_nearest_summary)
+
+    with layout_completeness_intro.container():
+        st.markdown(markdown_templates["completeness_intro"])
+
+    with layout_heatmap_intro.container():
+        st.markdown(state.text_heatmap_intro)
+
+    with layout_heatmap_figure.container():
+        TABTITLE_COMPLETENESS = [
+            "Heatmap Kelengkapan",
+            "Tabel Kelengkapan Data",
+            "Grafik Bar Kelengkapan Data",
+        ]
+
+        tabs_completeness = st.tabs(TABTITLE_COMPLETENESS)
+
+        with tabs_completeness[0]:
+            st.plotly_chart(
+                state.fig_heatmap,
+                use_container_width=True,
+                config={"displayModeBar": False},
+            )
+        with tabs_completeness[1]:
+            st.dataframe(state.completeness_df, use_container_width=True)
+        with tabs_completeness[2]:
+            for station_id, station_name, fig_bar in zip(
+                state.nearest_station_ids,
+                state.names_bar_completeness,
+                state.figs_bar_completeness,
+            ):
+                st.markdown(f"###### 🌧️ {station_id} - {station_name} 🌧️")
+                st.plotly_chart(
+                    fig_bar,
+                    use_container_width=True,
+                    config={"displayModeBar": False},
+                )
+
     with layout_rainfall_intro.container():
-        st.markdown(pg_rainfall_intro)
+        st.markdown(state.text_rainfall_intro)
 
     with layout_rainfall_figure.container():
         TABTITLE_RAINFALL = [
@@ -528,44 +445,43 @@ if st.session_state.IS_NEAREST_SECTION_DONE:
 
         with tabs_rainfall[0]:
             st.plotly_chart(
-                fig_rainfall, use_container_width=True, config={"displayModeBar": False}
+                state.fig_rainfall,
+                use_container_width=True,
+                config={"displayModeBar": False},
             )
         with tabs_rainfall[1]:
-            st.dataframe(rainfall_df, use_container_width=True)
+            st.dataframe(state.rainfall_df, use_container_width=True)
         with tabs_rainfall[2]:
-            st.dataframe(rainfall_df.describe(), use_container_width=True)
+            st.dataframe(state.rainfall_df.describe(), use_container_width=True)
 
-    ## save
-    mainfunc.session_state_update({"pg_rainfall_intro": pg_rainfall_intro})
+    layout_closing.markdown(markdown_templates["closing"])
 
-    if btn_generate_rainfall:
-        with layout_rainfall_summary.container():
-            with st.spinner("Generating Analysis..."):
-                response_rainfall = mainfunc.generate_gpt(
-                    prompt=prompt_rainfall,
-                    model=st.session_state.gpt_model,
-                    openai_api_key=st.session_state.openai_api_key,
-                )
+# GPT SECTION ################################################
 
-                mainfunc.session_state_update(
-                    {
-                        "GPT_RESPONSE_RAINFALL": response_rainfall,
-                        "GPT_PROMPT_RAINFALL": prompt_rainfall,
-                    }
-                )
+if state.IS_NEAREST_SECTION_DONE:
+    stationsfunc.render_gpt_result(
+        btn_generate_completeness,
+        layout_heatmap_summary,
+        state.prompt_completeness,
+        state.gpt_model,
+        state.openai_api_key,
+        "GPT_RESPONSE_COMPLETENESS",
+        "GPT_PROMPT_COMPLETENESS",
+        markdown_templates["heatmap_summary"],
+    )
 
-    if st.session_state.get("GPT_RESPONSE_RAINFALL") is not None:
-        with layout_rainfall_summary.container():
-            with st.expander("View Prompt"):
-                st.code(st.session_state.GPT_PROMPT_RAINFALL)
-            st.markdown(st.session_state.GPT_RESPONSE_RAINFALL)
-    else:
-        with layout_rainfall_summary.container(border=True):
-            st.markdown(placeholder_rainfall_summary, unsafe_allow_html=True)
-
-    layout_closing.markdown(placeholder_closing)
-
+    stationsfunc.render_gpt_result(
+        btn_generate_rainfall,
+        layout_rainfall_summary,
+        state.prompt_rainfall,
+        state.gpt_model,
+        state.openai_api_key,
+        "GPT_RESPONSE_RAINFALL",
+        "GPT_PROMPT_RAINFALL",
+        markdown_templates["rainfall_summary"],
+    )
 
 # REFRESH BUTTON
-st.divider()
-st.button("Refresh")
+if btn_refresh:
+    layout_heatmap_gpt.empty()
+    layout_rainfall_gpt.empty()

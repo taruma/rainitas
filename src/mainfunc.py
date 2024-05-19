@@ -1,8 +1,10 @@
 """Collection of functions for doing my project."""
 
 # from datetime import datetime
-from openai import OpenAI
 import streamlit as st
+from openai import OpenAI
+
+from src.version import APP_AUTHOR, APP_AUTHOR_URL, APP_NAME, APP_VERSION, APP_URL
 
 
 @st.cache_data
@@ -22,16 +24,17 @@ def load_css(filename: str) -> None:
 def main_sidebar():
     """Create the main sidebar for the app."""
     with st.sidebar:
+        st.header("🌧️ Rainitas", anchor=False, divider="blue")
         st.page_link("app.py", label="Rainitas", icon="🌧️")
-        st.write("**Aplikasi**")
+        st.header("**Aplikasi**", anchor=False, divider="green")
         st.page_link("pages/stations.py", label="Stations", icon="📍")
         # st.page_link("pages/rainfall.py", label="Rainfall", icon="📈")
         # st.page_link("pages/anfrek.py", label="Analysis", icon="🔮")
-        # st.write("_Generated_")
         # st.page_link("pages/summary.py", label="Summary", icon="📊")
 
-        st.divider()
-        st.write("created by [taruma](https://github.com/taruma)")
+        st.markdown(
+            f"#### [{APP_NAME}]({APP_URL}) {APP_VERSION} by [{APP_AUTHOR}]({APP_AUTHOR_URL})"
+        )
 
 
 def load_state():
@@ -55,7 +58,6 @@ def generate_gpt(
     openai_api_key=None,
 ):
     """Generate text from the given prompt."""
-
     try:
         # now = datetime.now()
         # print(f"RUNNING GPT {now.strftime('%Y%m%d_%H%M%S')}")
@@ -83,8 +85,8 @@ def generate_gpt(
         return message
 
     except Exception as e:  # pylint: disable=broad-except
-        st.toast("Error: " + str(e))
-        return ""
+        print(f"Error: {e}")
+        return f"Error: {e}"
 
 
 def session_state_create(kwargs):

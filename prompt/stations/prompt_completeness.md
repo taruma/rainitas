@@ -2,11 +2,11 @@ Pada tahap ini kamu sedang memeriksa kelengkapan data hujan pada setiap stasiun 
 
 Berikut tabel stasiun hujan terdekat:
 
-{table_nearest_stations_csv}
+{table_nearest_stations}
 
 Berikut tabel kelengkapan data hujan di setiap stasiun, dengan baris menunjukkan setiap bulannya dan kolom menunjukkan setiap stasiun (menggunakan kode stasiun):
 
-{table_completeness_data_csv}
+{table_completeness_data}
 
 Buat setidaknya 3 paragraf yang menganalisis data-data tersebut.
 
