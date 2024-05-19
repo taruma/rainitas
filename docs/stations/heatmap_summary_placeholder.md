@@ -1,4 +1,4 @@
-:red-background[_Analisis awal akan ditampilkan di sini sebagai pratinjau. Klik tombol :blue-background['Generate'] untuk menghasilkan analisis menggunakan GPT._]
+:red-background[_Analisis dibawah ini digunakan sebagai pratinjau. Klik tombol :blue-background['Generate'] untuk menghasilkan analisis menggunakan GPT._]
 
 Berdasarkan data kelengkapan pengamatan hujan dari beberapa stasiun di Jabodetabek, dapat dilihat bahwa ada pola penurunan kelengkapan data yang cukup signifikan khususnya pada periode akhir tahun yang tercatat. Khususnya pada **kg_96747 - Halim Perdana Kusuma Jakarta**, yang menunjukkan kecenderungan penurunan kelengkapan data yang drastis dari sekitar :blue-background[100%] pada tahun 2010 hingga tidak tercatat sama sekali mulai dari tahun 2019. Hal serupa juga terlihat di beberapa stasiun lain tetapi dalam ukuran yang tidak sebesar di Halim Perdana Kusuma Jakarta.
 

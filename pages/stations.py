@@ -27,8 +27,9 @@ st.set_page_config(
 mainfunc.session_state_create(
     {
         "IS_NEAREST_SECTION_DONE": False,
-        "GPT_RESPONSE_COMPLETENESS": None,
+        "GPT_RESPONSE_HEATMAP": None,
         "GPT_RESPONSE_RAINFALL": None,
+        "GPT_RESPONSE_CLOSING": None,
         "coordinate_name": "Queensdale",
         "latitude": "-6.2631",
         "longitude": "106.8095",
@@ -38,10 +39,10 @@ mainfunc.session_state_create(
     }
 )
 
+
 # LOAD CSS & SIDEBAR
 mainfunc.load_css("assets/stations.css")
 mainfunc.main_sidebar()
-
 
 # START OF LAYOUT SECTION #################################
 PAGE_TITLES = {
@@ -63,6 +64,9 @@ with st.sidebar:
     st.selectbox(
         "Select Model", ["gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"], key="gpt_model"
     )
+    # st.code(
+    #     "\n".join(sorted(state.keys())),
+    # )
 
 # HEADER SECTION -------------------------------------------
 # HEADER - TITLE SECTION -----------------------------------
@@ -115,6 +119,7 @@ layout_rainfall_summary = st.empty()
 
 # MAIN - CLOSING SECTION -----------------------------------
 st.header(PAGE_TITLES["title_closing"], anchor="closing", divider="blue")
+layout_closing_gpt = st.empty()
 layout_closing = st.empty()
 layout_closing.warning("Complete all sections to finish.")
 
@@ -123,10 +128,17 @@ layout_footer = st.empty()
 
 # END OF LAYOUT SECTION ------------------------------------
 
-
 # LOAD DATA & TEXT
 metadata_rainfall, metadata_completeness = stationsfunc.load_metadata()
 markdown_templates, prompt_templates = stationsfunc.load_templates()
+
+mainfunc.session_state_create(
+    {
+        "GPT_PROMPT_TEMPLATE_HEATMAP": prompt_templates["heatmap"],
+        "GPT_PROMPT_TEMPLATE_RAINFALL": prompt_templates["rainfall"],
+        "GPT_PROMPT_TEMPLATE_CLOSING": prompt_templates["closing"],
+    }
+)
 
 # LAYOUT DETAILS
 # DETAIL - HEADER SECTION -----------------------------------
@@ -206,16 +218,27 @@ with layout_map_input.container():
         )
 
 # BUTTONS SECTION ------------------------------------------
-with layout_heatmap_gpt.expander("Generate Analysis Using 🤖 GPT"):
-    btn_generate_completeness = st.button(
-        "Generate analysis of completeness", use_container_width=True
-    )
-with layout_rainfall_gpt.expander("Generate Analysis Using 🤖 GPT"):
-    btn_generate_rainfall = st.button(
-        "Generate analysis of rainfall", use_container_width=True
-    )
 
-with layout_footer:
+btn_generate_completeness = stationsfunc.generate_layout(
+    layout_heatmap_gpt,
+    "completeness",
+    state.GPT_PROMPT_TEMPLATE_HEATMAP,
+    "GPT_PROMPT_TEMPLATE_HEATMAP",
+)
+btn_generate_rainfall = stationsfunc.generate_layout(
+    layout_rainfall_gpt,
+    "rainfall",
+    state.GPT_PROMPT_TEMPLATE_RAINFALL,
+    "GPT_PROMPT_TEMPLATE_RAINFALL",
+)
+btn_generate_closing = stationsfunc.generate_layout(
+    layout_closing_gpt,
+    "closing",
+    state.GPT_PROMPT_TEMPLATE_CLOSING,
+    "GPT_PROMPT_TEMPLATE_CLOSING",
+)
+
+with layout_footer.container():
     st.divider()
     btn_refresh = st.button("Refresh", use_container_width=True)
 
@@ -322,7 +345,7 @@ if btn_find_nearest and IS_COORDINATE_VALID:
         "table_completeness_data": completeness_df.to_markdown(),
     }
 
-    prompt_completeness = prompt_templates["completeness"].format(**data_completeness)
+    prompt_heatmap = state.GPT_PROMPT_TEMPLATE_HEATMAP.format(**data_completeness)
     text_heatmap_intro = markdown_templates["heatmap_intro"].format(
         **valid_coordinate_info, **nearest_stats
     )
@@ -334,7 +357,7 @@ if btn_find_nearest and IS_COORDINATE_VALID:
             "figs_bar_completeness": figs_bar_completeness,
             "names_bar_completeness": names_bar_completeness,
             "nearest_station_ids": nearest_station_ids,
-            "prompt_completeness": prompt_completeness,
+            "prompt_heatmap": prompt_heatmap,
             "text_heatmap_intro": text_heatmap_intro,
         }
     )
@@ -362,7 +385,7 @@ if btn_find_nearest and IS_COORDINATE_VALID:
         "table_describe_rainfall": rainfall_df.describe().to_markdown(),
     }
 
-    prompt_rainfall = prompt_templates["rainfall"].format(**data_rainfall)
+    prompt_rainfall = state.GPT_PROMPT_TEMPLATE_RAINFALL.format(**data_rainfall)
     text_rainfall_intro = markdown_templates["rainfall_intro"].format(
         **{"list_of_nearest_stations": "\n".join(nearest_ids_names)}
     )
@@ -454,23 +477,22 @@ if state.IS_NEAREST_SECTION_DONE:
         with tabs_rainfall[2]:
             st.dataframe(state.rainfall_df.describe(), use_container_width=True)
 
-    layout_closing.markdown(markdown_templates["closing"])
 
 # GPT SECTION ################################################
 
 if state.IS_NEAREST_SECTION_DONE:
-    stationsfunc.render_gpt_result(
+    text_heatmap_summary = stationsfunc.render_gpt_result(
         btn_generate_completeness,
         layout_heatmap_summary,
-        state.prompt_completeness,
+        state.prompt_heatmap,
         state.gpt_model,
         state.openai_api_key,
-        "GPT_RESPONSE_COMPLETENESS",
-        "GPT_PROMPT_COMPLETENESS",
+        "GPT_RESPONSE_HEATMAP",
+        "GPT_PROMPT_HEATMAP",
         markdown_templates["heatmap_summary"],
     )
 
-    stationsfunc.render_gpt_result(
+    text_rainfall_summary = stationsfunc.render_gpt_result(
         btn_generate_rainfall,
         layout_rainfall_summary,
         state.prompt_rainfall,
@@ -481,7 +503,38 @@ if state.IS_NEAREST_SECTION_DONE:
         markdown_templates["rainfall_summary"],
     )
 
+    DATA_CLOSING = {
+        "text_nearest_intro": state.text_nearest_intro,
+        "table_nearest_updated": state.table_nearest_updated.to_markdown(),
+        "text_nearest_summary": state.text_nearest_summary,
+        "text_heatmap_intro": state.text_heatmap_intro,
+        "text_heatmap_summary": text_heatmap_summary,
+        "text_rainfall_intro": state.text_rainfall_intro,
+        "text_rainfall_summary": text_rainfall_summary,
+    }
+
+    prompt_closing = state.GPT_PROMPT_TEMPLATE_CLOSING.format(**DATA_CLOSING)
+
+    mainfunc.session_state_update(
+        {
+            "prompt_closing": prompt_closing,
+        }
+    )
+
+    stationsfunc.render_gpt_result(
+        btn_generate_closing,
+        layout_closing,
+        state.prompt_closing,
+        state.gpt_model,
+        state.openai_api_key,
+        "GPT_RESPONSE_CLOSING",
+        "GPT_PROMPT_CLOSING",
+        markdown_templates["closing"],
+    )
+
 # REFRESH BUTTON
 if btn_refresh:
     layout_heatmap_gpt.empty()
     layout_rainfall_gpt.empty()
+    layout_closing_gpt.empty()
+    layout_footer.empty()
