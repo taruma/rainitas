@@ -74,14 +74,30 @@ def load_templates():
     }
 
     loaded_prompt_files = {
-        "completeness": mainfunc.load_markdown(
-            "prompt/stations/prompt_completeness.md"
+        "heatmap": mainfunc.load_markdown(
+            "prompt/stations/prompt_heatmap.md"
         ),
         "rainfall": mainfunc.load_markdown("prompt/stations/prompt_rainfall_data.md"),
+        "closing": mainfunc.load_markdown("prompt/stations/prompt_closing.md"),
     }
 
     return loaded_markdown_files, loaded_prompt_files
 
+
+def generate_layout(layout, title, prompt_templates, prompt_key):
+    """Generate layout for GPT analysis."""
+    with layout.expander("Generate Analysis Using 🤖 GPT"):
+        st.text_area(
+            f"Template Prompt for {title}",
+            value=prompt_templates,
+            key=prompt_key,
+            help="Use placeholders as per the requirement.",
+            height=400,
+        )
+        btn_generate = st.button(
+            f"Generate analysis of {title.lower()}", use_container_width=True
+        )
+    return btn_generate
 
 
 def validate_input(coordinate_name, latitude, longitude, layout):
@@ -112,7 +128,6 @@ def validate_input(coordinate_name, latitude, longitude, layout):
 
     return True
 
-
 def render_gpt_result(
     btn_generate,
     layout_summary,
@@ -134,10 +149,17 @@ def render_gpt_result(
             mainfunc.session_state_update({response_key: response, prompt_key: prompt})
 
     if st.session_state.get(response_key) is not None:
+        result = st.session_state.get(response_key)
+    else:
+        result = placeholder
+
+    if st.session_state.get(response_key) is not None:
         with layout_summary.container():
             with st.expander("View Prompt"):
                 st.code(st.session_state.get(prompt_key))
-            st.markdown(st.session_state.get(response_key))
+            st.markdown(result)
     else:
         with layout_summary.container(border=True):
-            st.markdown(placeholder, unsafe_allow_html=True)
+            st.markdown(result, unsafe_allow_html=True)
+
+    return result
